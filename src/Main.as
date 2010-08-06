@@ -31,7 +31,7 @@
 		public static var pageHeight:Number 	= 300;
 		public static var pageHalfHeight:Number = 0;
 		
-		public static var cornerSize:Number 	= 50;
+		public static var cornerSize:Number 	= 70;
 		public static var animationSpeed:Number	= 0.2;
 		
 		public static var fixedRadius:Number 	= 0;
@@ -41,8 +41,6 @@
 		public static var maskWidth:Number 		= 0;
 		
 		public static var origin:Point;
-		/////public static var spineTop:Point;
-		/////public static var spineBottom:Point;
 
 		public static var pagesContent:/*MovieClip*/Array = [];
 		public static var originArea:MovieClip;
@@ -53,7 +51,7 @@
 		private var pagesLeft:/*XPage*/Array = [];
 		private var pagesRight:/*XPage*/Array = [];
 
-		private var pagesCount: int = 10;
+		private var pagesCount: int = 4;
 		
 		private var dragPage: XPage;
 		
@@ -87,16 +85,6 @@
 			// Points
 			origin 		= new Point(pageWidth, pageHalfHeight);
 			
-			//spineBottom = new Point(0, pageHalfHeight);  // relative to origin ////
-            //spineTop 	= new Point(0, -pageHalfHeight); // relative to origin /////
-			
-			// ------- bzzzzzzz
-			//mousez 		= new Point(pageWidth, pageHalfHeight); // relative to origin
-			//follow 		= new Point(pageWidth, pageHalfHeight); // relative to origin
-			// --------------------------------
-			
-			
-			
 			// ----------------- Draw Basic Interface ----------------------------- //
 			layoutRoot = new MovieClip();
 			layoutRoot.x = (stage.stageWidth - pageWidth * 2) / 2;
@@ -112,26 +100,36 @@
 			layoutRoot.addChild(pageArea);
 			// ----------------- Draw Basic Interface ----------------------------- //
 			
-			
 			// ----------------- Create Pages ------------------------------------- //
 			var i;
 			
 			for (i = 0; i < pagesCount / 2; i++)
 			{
 				pagesLeft[i] = __createPage(i, XPage.TYPE_LEFT);
+				
+				// Create Right Pages AFTER! without need to use regenerate content function
 				pagesRight[i] = __createPage(i, XPage.TYPE_RIGHT);
+			}
+
+			for (i = 0; i < pagesCount / 2; i++)
+			{
+				pageArea.addChild(pagesLeft[i].bottomPage);
+				pagesLeft[i].visible = false;
 			}
 			for (i = (pagesCount / 2) - 1; i >= 0; i--)
 			{
-				pageArea.addChild(pagesRight[i]);
-				//trace("add right page", i);
+				pageArea.addChild(pagesRight[i].bottomPage);
 				//pagesRight[i].visible = false;
+			}
+			for (i = (pagesCount / 2) - 1; i >= 0; i--)
+			{
+				pageArea.addChild(pagesLeft[i]);
+				pagesLeft[i].bottomPage.visible = false;
 			}
 			for (i = 0; i < pagesCount / 2; i++)
 			{
-				pageArea.addChild(pagesLeft[i]);
-				//trace("add left page", i);
-				pagesLeft[i].visible = false;
+				pageArea.addChild(pagesRight[i]);
+				//pagesRight[i].visible = false;
 			}
 			// ----------------- Create Pages ------------------------------------- //
 		}
@@ -193,11 +191,11 @@
 			var i;
 			
 			for (i = 0; i < pagesCount / 2; i++)
-				if (pagesLeft[i].active || pagesLeft[i].hover)
-					pagesLeft[i].mouse = new Point(originArea.mouseX, originArea.mouseY);
-			for (i = 0; i < pagesCount / 2; i++)
 				if (pagesRight[i].active || pagesRight[i].hover)
 					pagesRight[i].mouse = new Point(originArea.mouseX, originArea.mouseY);
+			for (i = 0; i < pagesCount / 2; i++)
+				if (pagesLeft[i].active || pagesLeft[i].hover)
+					pagesLeft[i].mouse = new Point(originArea.mouseX, originArea.mouseY);					
 		}
 		
 		private function mouseButtonUpHandler(e:MouseEvent):void 
@@ -218,8 +216,10 @@
 				//trace(XPage(e.target).pageType);
 				
 				pagesRight[XPage(e.target).index].visible = false;
+				pagesRight[XPage(e.target).index].bottomPage.visible = false;
 
 				pagesLeft[XPage(e.target).index].visible = true;	
+				pagesLeft[XPage(e.target).index].bottomPage.visible = true;	
 				pagesLeft[XPage(e.target).index].regenerateContent();
 				pagesLeft[XPage(e.target).index].resetPosition(XPage.TYPE_LEFT);
 			}
@@ -229,8 +229,10 @@
 				//trace(XPage(e.target).pageType);
 				
 				pagesLeft[XPage(e.target).index].visible = false;
+				pagesLeft[XPage(e.target).index].bottomPage.visible = false;
 
 				pagesRight[XPage(e.target).index].visible = true;
+				pagesRight[XPage(e.target).index].bottomPage.visible = true;
 				pagesRight[XPage(e.target).index].regenerateContent();
 				pagesRight[XPage(e.target).index].resetPosition(XPage.TYPE_RIGHT);
 			}
@@ -239,47 +241,8 @@
 		private function page_onStartAnimation(e:Event):void 
 		{
 			dragPage = XPage(e.target);
-			resetZOrder(dragPage);
 		}
 		
-		private function resetZOrder(activePage:XPage)
-		{
-			// Работает неправильно, так как нужно рассоединить страницу снизу и сверху
-			
-			//trace(activePage.pageType);
-			var i;
-
-			if (activePage.pageType == XPage.TYPE_LEFT)
-			{
-				/*for (i = (pagesCount / 2) - 1; i >= 0; i--)
-					pageArea.addChild(pagesRight[i]);*/
-				
-				for (i = (pagesCount / 2) - 1; i >= activePage.index; i--)	
-					pageArea.setChildIndex(pagesRight[i], pageArea.numChildren - 1);
-					
-				// Сделать нивидимую страницу слева самой верхней	
-				// pageArea.setChildIndex(pagesRight[activePage.index], pageArea.numChildren - 1);
-					
-				for (i = 0; i < activePage.index; i++)
-					pageArea.setChildIndex(pagesLeft[i], pageArea.numChildren - 1);
-				for (i = (pagesCount / 2) - 1; i >= activePage.index; i--)
-					pageArea.setChildIndex(pagesLeft[i], pageArea.numChildren - 1);
-			}				
-			
-			if (activePage.pageType == XPage.TYPE_RIGHT)
-			{
-				// Сделать нивидимую страницу самой верхней	
-				pageArea.setChildIndex(pagesLeft[activePage.index], pageArea.numChildren - 1);
-				
-				for (i = (pagesCount / 2) - 1; i > activePage.index; i--)
-					pageArea.setChildIndex(pagesRight[i], pageArea.numChildren - 1);
-				for (i = 0; i <= activePage.index; i++)
-					pageArea.setChildIndex(pagesRight[i], pageArea.numChildren - 1);
-					
-				/*for (i = 0; i < pagesCount / 2; i++)
-					pageArea.addChild(pagesLeft[i]);*/
-			}
-		}
 	}
 	
 }

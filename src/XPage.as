@@ -42,9 +42,9 @@ package
 		public var xpage:MovieClip;
 
 		/**
-		 * Main Maks Block
+		 * Main Maks xblock
 		 */
-		public var block:MovieClip;
+		public var xblock:MovieClip;
 		
 		/**
 		 * Main Maks Element
@@ -86,6 +86,12 @@ package
 		 */
 		public var animated:Boolean = false;
 		
+		
+		public var pmask:MovieClip;
+		public var pblock:MovieClip;
+		public var bottomPage:MovieClip;
+		public var bottomContainer:MovieClip;
+		
 		public static const DRAG_TOP:String 		= "top";
 		public static const DRAG_BOTTOM:String 		= "bottom";
 		
@@ -122,31 +128,68 @@ package
 					break;
 			}
 			
-			pmedia = Main.getPageContent(front);
 			xmedia = Main.getPageContent(back);
 			
 			xpage  = new MovieClip();
 			xpage.addChild(xmedia); // Центр расположен в углу за который выполнятется перетягивание
 			
-			block = new GUIMask();
-			block.scaleX = Main.maskWidth / 100;
-			block.scaleY = Main.maskHeight / 100;
+			xblock = new GUIMask();
+			xblock.scaleX = Main.maskWidth / 100;
+			xblock.scaleY = Main.maskHeight / 100;
 			
 			xmask = new MovieClip();
-			xmask.addChild(block);  // Центр расположен в углу вокруг которого выполняется вращение
+			xmask.addChild(xblock);  // Центр расположен в углу вокруг которого выполняется вращение
 			
 			maskContainer = new MovieClip();
-			maskContainer.addChild(pmedia);
 			maskContainer.addChild(xpage);
-			addChild(maskContainer);
 			addChild(xmask);
+			addChild(maskContainer);
 			maskContainer.mask = xmask;
+						
+			mouseEnabled = false;
+			mouseChildren = false;
+			
+			// ------- Create Bottom Element ---------- //
+			bottomPage = new MovieClip();
+						
+			pmedia = Main.getPageContent(front);
+			
+			pblock = new GUIMask();
+			pblock.scaleX = Main.maskWidth / 100;
+			pblock.scaleY = Main.maskHeight / 100;
+			
+			pmask = new MContainer();
+			pmask.addChild(pblock);  // Центр расположен в углу вокруг которого выполняется вращение
+			pmask.mouseEnabled = false;
+			
+			bottomContainer = new MovieClip();
+			bottomContainer.addChild(pmedia);
+			bottomPage.addChild(pmask);
+			bottomPage.addChild(bottomContainer);
+			bottomContainer.mask = pmask;
+			// ---------------------------------------- //
 			
 			addCorners();
-			
 			resetPosition();
-			
 			addEventListener(Event.ENTER_FRAME, onEnterFrame);
+		}
+		
+		public function regenerateContent()
+		{
+			//trace("REGENERATE", index, pageType);
+			
+			maskContainer.removeChild(xpage);
+			xmedia = Main.getPageContent(back);
+			if (xmedia.parent != null) xmedia.parent.removeChild(xmedia);
+			xpage.addChild(xmedia);
+			maskContainer.addChild(xpage);
+			
+			pmedia = Main.getPageContent(front);
+			if (pmedia.parent != null) pmedia.parent.removeChild(pmedia);
+			bottomContainer.addChild(pmedia);
+			
+			bottomContainer.setChildIndex(hotCornerTop, bottomContainer.numChildren - 1);
+			bottomContainer.setChildIndex(hotCornerBottom, bottomContainer.numChildren - 1);
 		}
 		
 		public function addCorners()
@@ -176,8 +219,8 @@ package
 			hotCornerTop.y = 0;
 			hotCornerBottom.y = Main.pageHeight - Main.cornerSize;
 			
-			maskContainer.addChild(hotCornerTop);
-			maskContainer.addChild(hotCornerBottom);
+			bottomContainer.addChild(hotCornerTop);
+			bottomContainer.addChild(hotCornerBottom);
 			
 			hotCornerTop.addEventListener(MouseEvent.MOUSE_OVER, onPageTopCorner_MouseOver);
 			hotCornerBottom.addEventListener(MouseEvent.MOUSE_OVER, onPageBottomCorner_MouseOver);
@@ -192,7 +235,6 @@ package
 		private function onPageCorner_MouseOut(e:MouseEvent):void 
 		{
 			clicktime = 0;
-			
 			if (hover)
 			{
 				hover = false;
@@ -331,26 +373,6 @@ package
 			} //
 		}
 		
-		public function regenerateContent()
-		{
-			//trace("REGENERATE", index, pageType);
-			
-			pmedia = Main.getPageContent(front);
-			xmedia = Main.getPageContent(back);
-			
-			if (pmedia.parent != null) pmedia.parent.removeChild(pmedia);
-			if (xmedia.parent != null) xmedia.parent.removeChild(xmedia);
-			
-			maskContainer.removeChild(xpage);
-			xpage.addChild(xmedia);
-
-			maskContainer.addChild(pmedia);
-			maskContainer.addChild(xpage);
-			
-			maskContainer.setChildIndex(hotCornerTop, maskContainer.numChildren - 1);
-			maskContainer.setChildIndex(hotCornerBottom, maskContainer.numChildren - 1);
-		}
-		
 		public function resetPosition(toPosition:String = null)
 		{
 			if (toPosition != null)
@@ -365,16 +387,22 @@ package
 				xmedia.y 		= - Main.pageHeight;
 				xpage.y 		= Main.pageHeight;
 
-				block.y 		= - Main.pageWidth - Main.pageHeight;
+				xblock.y 		= - Main.pageWidth - Main.pageHeight;
+				pblock.y 		= - Main.pageWidth - Main.pageHeight;
+				
 				xmask.y 		= Main.pageHeight;
+				pmask.y 		= Main.pageHeight;
 			}
 			if (dragtype == DRAG_TOP)
 			{
 				xmedia.y 		= 0;
 				xpage.y 		= 0;
 				
-				block.y 		= - Main.pageWidth;
+				xblock.y 		= - Main.pageWidth;
+				pblock.y 		= - Main.pageWidth;
+				
 				xmask.y 		= 0;
+				pmask.y 		= 0;
 			}
 			
 			/*trace(xpage.y);
@@ -382,37 +410,46 @@ package
 			trace(xpage.getChildAt(0).y);*/
 			
 			xpage.rotation 	= 0;
+			
 			xmask.rotation 	= 0;
+			pmask.rotation 	= 0;
 
 			
 			if (pageType == TYPE_RIGHT)
 			{
 				pmedia.x = Main.pageWidth;
 				xmedia.x = 0;
-				block.x = - Main.maskWidth;
+				
+				xblock.x = - Main.maskWidth;
+				pblock.x = - Main.maskWidth;
 				
 				if (pagePosition == TYPE_RIGHT)
 				{
 					xmask.x = 2 * Main.pageWidth;
+					pmask.x = 2 * Main.pageWidth;
 				}
 				if (pagePosition == TYPE_LEFT)
 				{
 					xmask.x = Main.pageWidth;
+					pmask.x = Main.pageWidth;
 				}
 			}
 			if (pageType == TYPE_LEFT)
 			{
 				pmedia.x = 0;
 				xmedia.x = - Main.pageWidth;
-				block.x = 0; 
+				xblock.x = 0; 
+				pblock.x = 0; 
 				
 				if (pagePosition == TYPE_LEFT)
 				{
 					xmask.x = 0;
+					pmask.x = 0;
 				}
 				if (pagePosition == TYPE_RIGHT)
 				{
 					xmask.x = Main.pageWidth;
+					pmask.x = Main.pageWidth;
 				}
 			}
 			
@@ -557,6 +594,9 @@ package
 			xmask.rotation = tanAngle != 0 ? 90 * (tanAngle / Math.abs(tanAngle)) - tanAngle * 180 / Math.PI : 0;
 			xmask.x = tangentBottom.x + Main.pageWidth;
 			
+			pmask.rotation = xmask.rotation;
+			pmask.x = xmask.x;
+
 			// DEBUG AREA
 			{
 				clearDots();
@@ -595,8 +635,8 @@ package
 					addDot(bisector.x, Main.pageHalfHeight, "T1");
 					addDot(tangentBottom.x, tangentBottom.y, "T2");
 					
-					//drawDemoCircle(0, Main.pageHalfHeight, Main.pageWidth, "");
-					//drawDemoCircle(0, -Main.pageHalfHeight, Main.pageDiagonal, "");
+					drawDemoCircle(0, Main.pageHalfHeight, Main.pageWidth, "");
+					drawDemoCircle(0, -Main.pageHalfHeight, Main.pageDiagonal, "");
 				}
 				if (dragtype == DRAG_TOP)
 				{
@@ -608,8 +648,8 @@ package
 					addDot(bisector.x, -Main.pageHalfHeight, "T1");
 					addDot(tangentBottom.x, tangentBottom.y, "T2");
 					
-					//drawDemoCircle(0, -Main.pageHalfHeight, Main.pageWidth, "");
-					//drawDemoCircle(0, Main.pageHalfHeight, Main.pageDiagonal, "");
+					drawDemoCircle(0, -Main.pageHalfHeight, Main.pageWidth, "");
+					drawDemoCircle(0, Main.pageHalfHeight, Main.pageDiagonal, "");
 				}
 				
 				/*var r0: Point = dots.globalToLocal(maskAngle.localToGlobal(new Point(- maskSize.x, -85)));
