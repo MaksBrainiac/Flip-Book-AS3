@@ -26,41 +26,35 @@ package
 		public var pageType: String;
 		public var pagePosition: String;
 		
-		/**
-		 * Front Page
-		 */
-		public var pmedia:MovieClip;
-
-		/**
-		 * Back Page
-		 */
-		public var xmedia:MovieClip;
 		
-		/**
-		 * Back Page Wrapper
-		 */
-		public var xpage:MovieClip;
-
-		/**
-		 * Main Mask xblock
-		 */
-		public var xblock:MovieClip;
-		
-		/**
-		 * Main Mask Element
-		 */
-		public var xmask:MovieClip;
-		
-		/**
-		 * Element for Mask
-		 */
-		public var maskContainer:MovieClip;
-		
-		/**
-		 * Debug Element
-		 */
+		public var back_side:MovieClip;
+			public var back_content:MovieClip;
+				public var back_media:MovieClip;
+		public var back_mask:MovieClip;
+			public var back_mblock:MovieClip;
+		public var back_inner_shadow:MovieClip;
+			public var back_ishadow_clip:MovieClip;
+		public var back_ismask:MovieClip;
+			public var back_isblock:MovieClip;
+		public var back_outer_shadow:MovieClip;
+			public var back_oshadow_clip:MovieClip;
+		public var back_osmask:MovieClip;
+			public var back_osblock:MovieClip;
+			
 		public var dots:MovieClip;
+			
+		public var frontPage:MovieClip;
 		
+			public var front_side:MovieClip;
+				public var front_media:MovieClip;
+				public var front_side_shadow:MovieClip;
+					public var front_sshadow_clip:MovieClip;
+				public var hotCornerTop:MovieClip;
+				public var hotCornerBottom:MovieClip;
+					
+			public var front_mask:MovieClip;
+			public var front_mblock:MovieClip;
+			
 		/**
 		 * Mouse Position
 		 */
@@ -87,20 +81,6 @@ package
 		public var animated:Boolean = false;
 		
 		
-		public var pmask:MovieClip;
-		public var pblock:MovieClip;
-		public var bottomPage:MovieClip;
-		public var bottomContainer:MovieClip;
-		
-		public var sblock:MovieClip;
-		public var mainShadow:MovieClip;
-		
-		public var sxblock:MovieClip;
-		public var maskedShadow:MovieClip;
-		
-		public var shadowMaskBlock:MovieClip;
-		public var shadowMask:MovieClip;
-		
 		public static const DRAG_TOP:String 		= "top";
 		public static const DRAG_BOTTOM:String 		= "bottom";
 		
@@ -108,11 +88,9 @@ package
 		public static const TYPE_LEFT:String 		= "left";
 
 		public var dragtype:String = DRAG_BOTTOM;
+		public var clicktime:int = 0;
 		
-		public var hotCornerTop:MovieClip;
-		public var hotCornerBottom:MovieClip;
 		
-		public var clicktime:int;
 		
 		public function XPage(index:int, type:String)
 		{
@@ -137,118 +115,151 @@ package
 					break;
 			}
 			
-			xmedia = Main.getPageContent(back);
-			
-			xpage  = new MovieClip();
-			xpage.addChild(xmedia); // Центр расположен в углу за который выполнятется перетягивание
-			
-			xblock = new GUIMask();
-			xblock.scaleX = Main.maskWidth / 100;
-			xblock.scaleY = Main.maskHeight / 100;
-			
-			xmask = new MovieClip();
-			xmask.addChild(xblock);  // Центр расположен в углу вокруг которого выполняется вращение
-			
-			maskContainer = new MovieClip();
-			maskContainer.addChild(xpage);
-			
-			addChild(xmask);
-			addChild(maskContainer);
-			maskContainer.mask = xmask;
-						
 			mouseEnabled = false;
 			mouseChildren = false;
 			
-			// ------- Create Bottom Element ---------- //
-			bottomPage = new MovieClip();
-						
-			pmedia = Main.getPageContent(front);
+			// ------------------ Create Back Page ----------------------------------------------------------- //
+			back_media = Main.getPageContent(back, type);
 			
-			pblock = new GUIMask();
-			pblock.scaleX = Main.maskWidth / 100;
-			pblock.scaleY = Main.maskHeight / 100;
+			back_content  = new MovieClip();
+			back_content.addChild(back_media); // Центр расположен в углу за который выполнятется перетягивание
 			
-			pmask = new MContainer();
-			pmask.addChild(pblock);  // Центр расположен в углу вокруг которого выполняется вращение
-			pmask.mouseEnabled = false;
-
-			// -------
-			sblock = new GUIShadow();
-			sblock.scaleX = Main.shadowWidth / 100;
-			sblock.scaleY = Main.pageHeight / 100;	// TODO: Plus page paddings
-
-			if (pageType == TYPE_LEFT)
-			{
-				sblock.rotation = 180;
-				sblock.y = Main.pageHeight;
-			}
+			back_side = new MovieClip();
+			back_side.addChild(back_content);
 			
-			mainShadow = new MovieClip();
-			mainShadow.addChild(sblock);
-			// -------
+			back_mblock = new GUIMask();
+			back_mblock.scaleX = Main.maskWidth / 100;
+			back_mblock.scaleY = Main.maskHeight / 100;
+			
+			back_mask = new MovieClip();
+			back_mask.addChild(back_mblock); // Центр расположен в углу вокруг которого выполняется вращение
+			
+			addChild(back_side);
+			addChild(back_mask);
+			
+			back_mask.mouseEnabled = false;
+			back_mask.mouseChildren = false;
+			back_side.mask = back_mask;
+			// ------------------ Create Back Page ----------------------------------------------------------- //
 			
 			
-			bottomContainer = new MovieClip();
-			bottomContainer.addChild(pmedia);
-			bottomContainer.addChild(mainShadow);			
-			
-			bottomPage.addChild(pmask);
-			bottomPage.addChild(bottomContainer);
-			bottomContainer.mask = pmask;
-			
-			// ---------------------------------------- //
-			
-			
-			// ---------------------------------------- //
-			sxblock = new GUIShadow();
-			sxblock.scaleX = Main.shadowWidth / 100;
-			sxblock.scaleY = Main.pageDiagonal / 100;
+			// ------------------ Create Inner Diagonal Shadow ----------------------------------------------- //
+			back_ishadow_clip = new GUIShadow();
+			back_ishadow_clip.scaleX = Main.shadowWidth / 100;
+			back_ishadow_clip.scaleY = Main.pageDiagonal / 100;
 
 			if (pageType == TYPE_RIGHT)
-				sxblock.rotation = 180;
+				back_ishadow_clip.rotation = 180;
 			
-			maskedShadow = new MovieClip(); // Position like in Xmask
-			maskedShadow.addChild(sxblock);
+			back_inner_shadow = new MovieClip();
+			back_inner_shadow.addChild(back_ishadow_clip);
 			
-			addChild(maskedShadow);			
+			back_isblock = new GUIMask();
+			back_isblock.scaleX = Main.pageWidth / 100;
+			back_isblock.scaleY = Main.pageHeight / 100;
 			
-			shadowMaskBlock = new GUIMask(); // like xmedia
-			shadowMaskBlock.scaleX = Main.pageWidth / 100;
-			shadowMaskBlock.scaleY = Main.pageHeight / 100;
+			back_ismask = new MovieClip();
+			back_ismask.addChild(back_isblock);
 			
-			shadowMask = new MovieClip(); // like xpage
-			shadowMask.addChild(shadowMaskBlock);
+			addChild(back_inner_shadow);
+			addChild(back_ismask);
 			
-			addChild(shadowMask);
-			maskedShadow.mask = shadowMask;
-			// ---------------------------------------- //
+			back_ismask.mouseEnabled = false;
+			back_ismask.mouseChildren = false;
+			back_inner_shadow.mask = back_ismask;
+			// ------------------ Create Inner Diagonal Shadow ----------------------------------------------- //
 			
 			
-			addCorners();
+			// ------------------ Create Outer Diagonal Shadow ----------------------------------------------- //
+			back_oshadow_clip = new GUIShadow();
+			back_oshadow_clip.scaleX = Main.shadowWidth / 100;
+			back_oshadow_clip.scaleY = Main.pageDiagonal / 100;
+
+			if (pageType == TYPE_LEFT)
+				back_oshadow_clip.rotation = 180;
+			
+			back_outer_shadow = new MovieClip();
+			back_outer_shadow.addChild(back_oshadow_clip);
+			
+			back_osblock = new GUIMask();
+			back_osblock.scaleX = Main.pageWidth / 100;
+			back_osblock.scaleY = Main.pageHeight / 100;
+			
+			back_osmask = new MovieClip();
+			back_osmask.addChild(back_osblock);
+			
+			addChild(back_outer_shadow);
+			addChild(back_osmask);
+			
+			back_osmask.mouseEnabled = false;
+			back_osmask.mouseChildren = false;
+			back_outer_shadow.mask = back_osmask;
+			// ------------------ Create Outer Diagonal Shadow ----------------------------------------------- //
+			
+			
+			
+			// ------------------ Create Front Static Page -------------------------------------------------- //
+			frontPage = new MovieClip();
+			
+			front_media = Main.getPageContent(front, type);
+			
+				// -------- Inner Static Shadow -------------------------------- //
+				front_sshadow_clip = new GUIShadow();
+				front_sshadow_clip.scaleX = Main.shadowWidth / 100;
+				front_sshadow_clip.scaleY = Main.pageHeight / 100;	// TODO: Plus page paddings
+
+				if (pageType == TYPE_LEFT)
+				{
+					front_sshadow_clip.rotation = 180;
+					front_sshadow_clip.y = Main.pageHeight;
+				}
+				
+				front_side_shadow = new MovieClip();
+				front_side_shadow.addChild(front_sshadow_clip);			
+				// -------- Inner Static Shadow -------------------------------- //
+				
+			front_side = new MovieClip();
+			front_side.addChild(front_media);
+			front_side.addChild(front_side_shadow);			
+			
+			__addCorners();
+			
+			front_mblock = new GUIMask();
+			front_mblock.scaleX = Main.maskWidth / 100;
+			front_mblock.scaleY = Main.maskHeight / 100;
+			
+			front_mask = new MovieClip();
+			front_mask.addChild(front_mblock);  // Центр расположен в углу вокруг которого выполняется вращение
+			front_mask.mouseEnabled = false;
+			
+			frontPage.addChild(front_mask);
+			frontPage.addChild(front_side);
+			
+			front_mask.mouseEnabled = false;
+			front_mask.mouseChildren = false;
+			front_side.mask = front_mask;
+			// ------------------ Create Front Static Page -------------------------------------------------- //
+			
 			resetPosition();
 			addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
 		
 		public function regenerateContent()
 		{
-			//trace("REGENERATE", index, pageType);
+			back_media = Main.getPageContent(back, pagePosition);
+			if (back_media.parent != null) back_media.parent.removeChild(back_media);
+			back_content.addChild(back_media);
 			
-			maskContainer.removeChild(xpage);
-			xmedia = Main.getPageContent(back);
-			if (xmedia.parent != null) xmedia.parent.removeChild(xmedia);
-			xpage.addChild(xmedia);
-			maskContainer.addChild(xpage);
-			
-			pmedia = Main.getPageContent(front);
-			if (pmedia.parent != null) pmedia.parent.removeChild(pmedia);
-			bottomContainer.addChild(pmedia);
-			bottomContainer.setChildIndex(mainShadow, bottomContainer.numChildren - 1);
-			
-			bottomContainer.setChildIndex(hotCornerTop, bottomContainer.numChildren - 1);
-			bottomContainer.setChildIndex(hotCornerBottom, bottomContainer.numChildren - 1);
+			front_media = Main.getPageContent(front, pagePosition);
+			if (front_media.parent != null) front_media.parent.removeChild(front_media);
+			front_side.addChild(front_media);
+
+			front_side.setChildIndex(front_side_shadow, front_side.numChildren - 1);
+			front_side.setChildIndex(hotCornerTop, front_side.numChildren - 1);
+			front_side.setChildIndex(hotCornerBottom, front_side.numChildren - 1);
 		}
 		
-		public function addCorners()
+		private function __addCorners()
 		{
 			hotCornerTop = new GUIMask();
 			hotCornerTop.buttonMode = true;
@@ -275,8 +286,8 @@ package
 			hotCornerTop.y = 0;
 			hotCornerBottom.y = Main.pageHeight - Main.cornerSize;
 			
-			bottomContainer.addChild(hotCornerTop);
-			bottomContainer.addChild(hotCornerBottom);
+			front_side.addChild(hotCornerTop);
+			front_side.addChild(hotCornerBottom);
 			
 			hotCornerTop.addEventListener(MouseEvent.MOUSE_OVER, onPageTopCorner_MouseOver);
 			hotCornerBottom.addEventListener(MouseEvent.MOUSE_OVER, onPageBottomCorner_MouseOver);
@@ -404,8 +415,6 @@ package
 					}
 					else
 					{
-						//trace("RESET to LEFT");
-						
 						pagePosition = TYPE_LEFT;
 						dispatchEvent(new Event("AnimationComplete"));
 					}
@@ -419,8 +428,6 @@ package
 					}
 					else
 					{
-						//trace("RESET to RIGHT");
-						
 						pagePosition = TYPE_RIGHT;
 						dispatchEvent(new Event("AnimationComplete"));
 					}
@@ -436,109 +443,130 @@ package
 
 			//trace("Reset position page:", pageType, "position:", pagePosition, "index:", index, "visible:", visible.toString(), "Dragtype: ", dragtype);	
 				
-			pmedia.y = 0; // always
-			mainShadow.x = Main.pageWidth;
-			mainShadow.y = 0;
-			
-			maskedShadow.scaleY = 1;
+			front_media.y = 0; 						// always
+			front_side_shadow.x = Main.pageWidth;	// always
+			front_side_shadow.y = 0;				// always
 			
 			if (dragtype == DRAG_BOTTOM)
 			{
-				xmedia.y 		= - Main.pageHeight;
-				xpage.y 		= Main.pageHeight;
+				back_media.y 			= - Main.pageHeight;
+				back_content.y 			= Main.pageHeight;
 
-				xblock.y 		= - Main.pageWidth - Main.pageHeight * 1.5;
-				pblock.y 		= - Main.pageWidth - Main.pageHeight * 1.5;
-				sxblock.y 		= 0; // Main.pageHeight * 0.5 + Main.pageWidth;
-				
-				xmask.y 		= Main.pageHeight;
-				pmask.y 		= Main.pageHeight;
-				maskedShadow.y	= Main.pageHeight;
+				back_mblock.y 			= - Main.pageWidth - Main.pageHeight * 1.5;
+				back_mask.y 			= Main.pageHeight;
 			}
 			if (dragtype == DRAG_TOP)
 			{
-				xmedia.y 		= 0;
-				xpage.y 		= 0;
+				back_media.y 			= 0;
+				back_content.y 			= 0;
 				
-				xblock.y 		= - Main.pageWidth - Main.pageHeight * 0.5;
-				pblock.y 		= - Main.pageWidth - Main.pageHeight * 0.5;
-				sxblock.y 		= Main.pageDiagonal; // Main.pageHeight * 1.5 + Main.pageWidth;
-				
-				xmask.y 		= 0;
-				pmask.y 		= 0;
-				maskedShadow.y	= 0;
+				back_mblock.y 			= - Main.pageWidth - Main.pageHeight * 0.5;
+				back_mask.y 			= 0;
 			}
-			
-			/*trace(xpage.y);
-			trace(xmedia.y);
-			trace(xpage.getChildAt(0).y);*/
-			
-			xpage.rotation 		= 0;
-			
-			xmask.rotation 		= 0;
-			pmask.rotation 		= 0;
-			maskedShadow.rotation = 0;
-
 			
 			if (pageType == TYPE_RIGHT)
 			{
-				pmedia.x = Main.pageWidth;
-				xmedia.x = 0;
-				
-				xblock.x = - Main.maskWidth;
-				pblock.x = - Main.maskWidth;
+				back_media.x = 0;
+				back_mblock.x = - Main.maskWidth;
+				front_media.x = Main.pageWidth;
 				
 				if (pagePosition == TYPE_RIGHT)
 				{
-					xmask.x = 2 * Main.pageWidth;
-					pmask.x = 2 * Main.pageWidth;
-					maskedShadow.x = 2 * Main.pageWidth;
+					back_mask.x = 2 * Main.pageWidth;
 				}
 				if (pagePosition == TYPE_LEFT)
 				{
-					xmask.x = Main.pageWidth;
-					pmask.x = Main.pageWidth;
-					maskedShadow.x = Main.pageWidth;
+					back_mask.x = Main.pageWidth;
 				}
 			}
 			if (pageType == TYPE_LEFT)
 			{
-				pmedia.x = 0;
-				xmedia.x = - Main.pageWidth;
-				
-				xblock.x = 0; 
-				pblock.x = 0; 
-				
+				back_media.x = - Main.pageWidth;
+				back_mblock.x = 0; 
+				front_media.x = 0;
+
 				if (pagePosition == TYPE_LEFT)
 				{
-					xmask.x = 0;
-					pmask.x = 0;
-					maskedShadow.x = 0;
+					back_mask.x = 0;
 				}
 				if (pagePosition == TYPE_RIGHT)
 				{
-					xmask.x = Main.pageWidth;
-					pmask.x = Main.pageWidth;
-					maskedShadow.x = Main.pageWidth;
+					back_mask.x = Main.pageWidth;
 				}
 			}
 			
 			if (pagePosition == TYPE_RIGHT)
 			{
-				xpage.x = 2 * Main.pageWidth;
+				back_content.x = 2 * Main.pageWidth;
 			}	
 			if (pagePosition == TYPE_LEFT)
 			{
-				xpage.x = 0;
+				back_content.x = 0;
 			}
 			
 			
-			shadowMaskBlock.x = xmedia.x;
-			shadowMaskBlock.y = xmedia.y;
+
+			if (pageType == TYPE_RIGHT)
+			{
+				if (dragtype == DRAG_BOTTOM)
+				{
+					back_ishadow_clip.y 	= 0;
+					back_oshadow_clip.y		= -Main.pageDiagonal;
+				}
+				if (dragtype == DRAG_TOP)
+				{
+					back_ishadow_clip.y 	= Main.pageDiagonal;
+					back_oshadow_clip.y		= 0;
+				}
+			}
+			if (pageType == TYPE_LEFT)
+			{
+				if (dragtype == DRAG_BOTTOM)
+				{
+					back_ishadow_clip.y 	= -Main.pageDiagonal;
+					back_oshadow_clip.y		= 0;
+				}
+				if (dragtype == DRAG_TOP)
+				{
+					back_ishadow_clip.y 	= 0;
+					back_oshadow_clip.y		= Main.pageDiagonal;
+				}
+			}
 			
-			shadowMask.x = xpage.x;
-			shadowMask.y = xpage.y;
-			shadowMask.rotation = xpage.rotation;
+			back_content.rotation 		= 0;
+			back_mask.rotation 			= 0;
+			
+			// ------- FrontMBlock == BackMBlock ---------- // Block of front page mask is the same as back
+			front_mblock.x				= back_mblock.x;
+			front_mblock.y				= back_mblock.y;
+			
+			// -------- BackInnerShadowBlock == BackMedia - // Mask for shadow is page size and position
+			back_isblock.x 				= back_media.x;
+			back_isblock.y 				= back_media.y;
+
+			// -------- BackOuterMask == FrontMedia - // Mask for outer shadow is front page
+			back_osmask.x 				= front_media.x;
+			back_osmask.y 				= front_media.y;
+			
+			// ------- FrontMask == BackMask -------------- // Front page mask is the same as back
+			front_mask.rotation			= back_mask.rotation;
+			front_mask.x 				= back_mask.x;
+			front_mask.y 				= back_mask.y;
+			
+			// -------- BackInnerShadow == BackMask ------- // Position of diagonal shadow is position of mask
+			back_inner_shadow.rotation	= back_mask.rotation;
+			back_inner_shadow.x 		= back_mask.x;
+			back_inner_shadow.y 		= back_mask.y;
+
+			// -------- BackOuterShadow == BackMask ------- // Position of diagonal shadow is position of mask
+			back_outer_shadow.rotation	= back_mask.rotation;
+			back_outer_shadow.x 		= back_mask.x;
+			back_outer_shadow.y 		= back_mask.y;
+			
+			// -------- BackShadowMash == MackContent ----- // Shadow Mask has the same position as back page
+			back_ismask.rotation 		= back_content.rotation;
+			back_ismask.x 				= back_content.x;
+			back_ismask.y 				= back_content.y;
 		}
 		
 		public function render()
@@ -631,9 +659,6 @@ package
 				bisectorAngle 		= Math.atan2(neary - bisector.y, Main.pageWidth + bisector.x);
 				bisectorTanget 		= bisector.x + Math.tan(bisectorAngle) * (neary - bisector.y);
 				
-				//tangentBottom.x 	= bisectorTanget;
-				//tangentBottom.y 	= neary;
-				
 				if (bisectorTanget > 0)
 					bisectorTanget = 0;
 			}
@@ -645,9 +670,6 @@ package
 				bisectorAngle 		= Math.atan2(neary - bisector.y, Main.pageWidth - bisector.x);
 				bisectorTanget 		= bisector.x - Math.tan(bisectorAngle) * (neary - bisector.y);
 				
-				//tangentBottom.x 	= bisectorTanget;
-				//tangentBottom.y 	= neary;
-            
 				if (bisectorTanget < 0)
 					bisectorTanget = 0;
 			}
@@ -658,32 +680,47 @@ package
 			// DETERMINE THE tangentToCorner FOR THE ANGLE OF THE PAGE
             tangentToCornerAngle = Math.atan2(tangentBottom.y - corner.y, tangentBottom.x - corner.x);
 			
-			xpage.x 		= Main.origin.x + corner.x;
-			xpage.y 		= Main.origin.y + corner.y;
+			back_content.x 		= Main.origin.x + corner.x;
+			back_content.y 		= Main.origin.y + corner.y;
 			
 			if (pageType == TYPE_RIGHT)
-				xpage.rotation = tangentToCornerAngle * 180.0 / Math.PI;
+				back_content.rotation = tangentToCornerAngle * 180.0 / Math.PI;
 			if (pageType == TYPE_LEFT)
-				xpage.rotation = 180 + tangentToCornerAngle * 180.0 / Math.PI;
+				back_content.rotation = 180 + tangentToCornerAngle * 180.0 / Math.PI;
 			
 			// DETERMINE THE ANGLE OF THE MAIN MASK RECTANGLE
             var tanAngle:Number		= Math.atan2(neary - bisector.y, bisector.x - bisectorTanget);
 				
             // VISUALIZE THE CLIPPING RECTANGLE
-			xmask.rotation = tanAngle != 0 ? 90 * (tanAngle / Math.abs(tanAngle)) - tanAngle * 180 / Math.PI : 0;
-			xmask.x = tangentBottom.x + Main.pageWidth;
+			back_mask.rotation = tanAngle != 0 ? 90 * (tanAngle / Math.abs(tanAngle)) - tanAngle * 180 / Math.PI : 0;
+			back_mask.x = tangentBottom.x + Main.pageWidth;
 			
-			pmask.rotation = xmask.rotation;
-			pmask.x = xmask.x;
+			
+			
+			
+			// ------- FrontMask == BackMask -------------- // Front page mask is the same as back
+			front_mask.rotation			= back_mask.rotation;
+			front_mask.x 				= back_mask.x;
+			front_mask.y 				= back_mask.y;
+			
+			// -------- BackInnerShadow == BackMask ------- // Position of diagonal shadow is position of mask
+			back_inner_shadow.rotation	= back_mask.rotation;
+			back_inner_shadow.x 		= back_mask.x;
+			back_inner_shadow.y 		= back_mask.y;
 
-			maskedShadow.rotation = xmask.rotation;
-			maskedShadow.x = xmask.x;
+			// -------- BackOuterShadow == BackMask ------- // Position of diagonal shadow is position of mask
+			back_outer_shadow.rotation	= back_mask.rotation;
+			back_outer_shadow.x 		= back_mask.x;
+			back_outer_shadow.y 		= back_mask.y;
+			
+			// -------- BackShadowMash == MackContent ----- // Shadow Mask has the same position as back page
+			back_ismask.rotation 		= back_content.rotation;
+			back_ismask.x 				= back_content.x;
+			back_ismask.y 				= back_content.y;
 			
 			
 			
-			shadowMask.x = xpage.x;
-			shadowMask.y = xpage.y;
-			shadowMask.rotation = xpage.rotation;
+			
 			
 			/*var py:Number = -Main.pageHalfHeight;
 			var px:Number = tangentBottom.x + Main.pageHeight / Math.tan(tanAngle);
@@ -780,7 +817,7 @@ package
 			dots.y = Main.origin.y;
 			addChild(dots);
 			
-			//dots.visible = false;
+			dots.visible = false;
 		}
 		
 		private function addDot(x: Number, y: Number, s:String)

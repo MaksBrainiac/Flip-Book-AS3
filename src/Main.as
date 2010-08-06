@@ -53,7 +53,7 @@
 		private var pagesLeft:/*XPage*/Array = [];
 		private var pagesRight:/*XPage*/Array = [];
 
-		private var pagesCount: int = 2;
+		private var pagesCount: int = 10;
 		
 		private var dragPage: XPage;
 		
@@ -115,18 +115,18 @@
 
 			for (i = 0; i < pagesCount / 2; i++)
 			{
-				pageArea.addChild(pagesLeft[i].bottomPage);
+				pageArea.addChild(pagesLeft[i].frontPage);
 				pagesLeft[i].visible = false;
 			}
 			for (i = (pagesCount / 2) - 1; i >= 0; i--)
 			{
-				pageArea.addChild(pagesRight[i].bottomPage);
+				pageArea.addChild(pagesRight[i].frontPage);
 				//pagesRight[i].visible = false;
 			}
 			for (i = (pagesCount / 2) - 1; i >= 0; i--)
 			{
 				pageArea.addChild(pagesLeft[i]);
-				pagesLeft[i].bottomPage.visible = false;
+				pagesLeft[i].frontPage.visible = false;
 			}
 			for (i = 0; i < pagesCount / 2; i++)
 			{
@@ -165,7 +165,7 @@
 			return page;
 		}
 		
-		public static function getPageContent(i:int): MovieClip
+		public static function getPageContent(i:int, position:String): MovieClip
 		{
 			if (pagesContent[i] == null)
 			{
@@ -218,10 +218,10 @@
 				//trace(XPage(e.target).pageType);
 				
 				pagesRight[XPage(e.target).index].visible = false;
-				pagesRight[XPage(e.target).index].bottomPage.visible = false;
+				pagesRight[XPage(e.target).index].frontPage.visible = false;
 
 				pagesLeft[XPage(e.target).index].visible = true;	
-				pagesLeft[XPage(e.target).index].bottomPage.visible = true;	
+				pagesLeft[XPage(e.target).index].frontPage.visible = true;	
 				pagesLeft[XPage(e.target).index].regenerateContent();
 				pagesLeft[XPage(e.target).index].resetPosition(XPage.TYPE_LEFT);
 			}
@@ -231,10 +231,10 @@
 				//trace(XPage(e.target).pageType);
 				
 				pagesLeft[XPage(e.target).index].visible = false;
-				pagesLeft[XPage(e.target).index].bottomPage.visible = false;
+				pagesLeft[XPage(e.target).index].frontPage.visible = false;
 
 				pagesRight[XPage(e.target).index].visible = true;
-				pagesRight[XPage(e.target).index].bottomPage.visible = true;
+				pagesRight[XPage(e.target).index].frontPage.visible = true;
 				pagesRight[XPage(e.target).index].regenerateContent();
 				pagesRight[XPage(e.target).index].resetPosition(XPage.TYPE_RIGHT);
 			}
