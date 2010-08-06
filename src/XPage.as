@@ -42,12 +42,12 @@ package
 		public var xpage:MovieClip;
 
 		/**
-		 * Main Maks xblock
+		 * Main Mask xblock
 		 */
 		public var xblock:MovieClip;
 		
 		/**
-		 * Main Maks Element
+		 * Main Mask Element
 		 */
 		public var xmask:MovieClip;
 		
@@ -91,6 +91,15 @@ package
 		public var pblock:MovieClip;
 		public var bottomPage:MovieClip;
 		public var bottomContainer:MovieClip;
+		
+		public var sblock:MovieClip;
+		public var mainShadow:MovieClip;
+		
+		public var sxblock:MovieClip;
+		public var maskedShadow:MovieClip;
+		
+		public var shadowMaskBlock:MovieClip;
+		public var shadowMask:MovieClip;
 		
 		public static const DRAG_TOP:String 		= "top";
 		public static const DRAG_BOTTOM:String 		= "bottom";
@@ -142,6 +151,7 @@ package
 			
 			maskContainer = new MovieClip();
 			maskContainer.addChild(xpage);
+			
 			addChild(xmask);
 			addChild(maskContainer);
 			maskContainer.mask = xmask;
@@ -161,13 +171,58 @@ package
 			pmask = new MContainer();
 			pmask.addChild(pblock);  // Центр расположен в углу вокруг которого выполняется вращение
 			pmask.mouseEnabled = false;
+
+			// -------
+			sblock = new GUIShadow();
+			sblock.scaleX = Main.shadowWidth / 100;
+			sblock.scaleY = Main.pageHeight / 100;	// TODO: Plus page paddings
+
+			if (pageType == TYPE_LEFT)
+			{
+				sblock.rotation = 180;
+				sblock.y = Main.pageHeight;
+			}
+			
+			mainShadow = new MovieClip();
+			mainShadow.addChild(sblock);
+			// -------
+			
 			
 			bottomContainer = new MovieClip();
 			bottomContainer.addChild(pmedia);
+			bottomContainer.addChild(mainShadow);			
+			
 			bottomPage.addChild(pmask);
 			bottomPage.addChild(bottomContainer);
 			bottomContainer.mask = pmask;
+			
 			// ---------------------------------------- //
+			
+			
+			// ---------------------------------------- //
+			sxblock = new GUIShadow();
+			sxblock.scaleX = Main.shadowWidth / 100;
+			sxblock.scaleY = Main.pageDiagonal / 100;
+
+			if (pageType == TYPE_RIGHT)
+				sxblock.rotation = 180;
+			
+			maskedShadow = new MovieClip(); // Position like in Xmask
+			maskedShadow.addChild(sxblock);
+			
+			addChild(maskedShadow);			
+			
+			shadowMaskBlock = new GUIMask(); // like xmedia
+			shadowMaskBlock.scaleX = Main.pageWidth / 100;
+			shadowMaskBlock.scaleY = Main.pageHeight / 100;
+			
+			shadowMask = new MovieClip(); // like xpage
+			shadowMask.addChild(shadowMaskBlock);
+			
+			addChild(shadowMask);
+			maskedShadow.mask = shadowMask;
+			// ---------------------------------------- //
+			
 			
 			addCorners();
 			resetPosition();
@@ -187,6 +242,7 @@ package
 			pmedia = Main.getPageContent(front);
 			if (pmedia.parent != null) pmedia.parent.removeChild(pmedia);
 			bottomContainer.addChild(pmedia);
+			bottomContainer.setChildIndex(mainShadow, bottomContainer.numChildren - 1);
 			
 			bottomContainer.setChildIndex(hotCornerTop, bottomContainer.numChildren - 1);
 			bottomContainer.setChildIndex(hotCornerBottom, bottomContainer.numChildren - 1);
@@ -306,7 +362,7 @@ package
 				yPos = -Main.pageHalfHeight;
 			
 			var stoptime:int = getTimer();
-			if (stoptime - clicktime < Main.clickSpeed)
+			if (clicktime > 0 && stoptime - clicktime < Main.clickSpeed)
 				mouse.x = -mouse.x;
 				
 			if (mouse.x < 0)
@@ -381,38 +437,47 @@ package
 			//trace("Reset position page:", pageType, "position:", pagePosition, "index:", index, "visible:", visible.toString(), "Dragtype: ", dragtype);	
 				
 			pmedia.y = 0; // always
-				
+			mainShadow.x = Main.pageWidth;
+			mainShadow.y = 0;
+			
+			maskedShadow.scaleY = 1;
+			
 			if (dragtype == DRAG_BOTTOM)
 			{
 				xmedia.y 		= - Main.pageHeight;
 				xpage.y 		= Main.pageHeight;
 
-				xblock.y 		= - Main.pageWidth - Main.pageHeight;
-				pblock.y 		= - Main.pageWidth - Main.pageHeight;
+				xblock.y 		= - Main.pageWidth - Main.pageHeight * 1.5;
+				pblock.y 		= - Main.pageWidth - Main.pageHeight * 1.5;
+				sxblock.y 		= 0; // Main.pageHeight * 0.5 + Main.pageWidth;
 				
 				xmask.y 		= Main.pageHeight;
 				pmask.y 		= Main.pageHeight;
+				maskedShadow.y	= Main.pageHeight;
 			}
 			if (dragtype == DRAG_TOP)
 			{
 				xmedia.y 		= 0;
 				xpage.y 		= 0;
 				
-				xblock.y 		= - Main.pageWidth;
-				pblock.y 		= - Main.pageWidth;
+				xblock.y 		= - Main.pageWidth - Main.pageHeight * 0.5;
+				pblock.y 		= - Main.pageWidth - Main.pageHeight * 0.5;
+				sxblock.y 		= Main.pageDiagonal; // Main.pageHeight * 1.5 + Main.pageWidth;
 				
 				xmask.y 		= 0;
 				pmask.y 		= 0;
+				maskedShadow.y	= 0;
 			}
 			
 			/*trace(xpage.y);
 			trace(xmedia.y);
 			trace(xpage.getChildAt(0).y);*/
 			
-			xpage.rotation 	= 0;
+			xpage.rotation 		= 0;
 			
-			xmask.rotation 	= 0;
-			pmask.rotation 	= 0;
+			xmask.rotation 		= 0;
+			pmask.rotation 		= 0;
+			maskedShadow.rotation = 0;
 
 			
 			if (pageType == TYPE_RIGHT)
@@ -427,17 +492,20 @@ package
 				{
 					xmask.x = 2 * Main.pageWidth;
 					pmask.x = 2 * Main.pageWidth;
+					maskedShadow.x = 2 * Main.pageWidth;
 				}
 				if (pagePosition == TYPE_LEFT)
 				{
 					xmask.x = Main.pageWidth;
 					pmask.x = Main.pageWidth;
+					maskedShadow.x = Main.pageWidth;
 				}
 			}
 			if (pageType == TYPE_LEFT)
 			{
 				pmedia.x = 0;
 				xmedia.x = - Main.pageWidth;
+				
 				xblock.x = 0; 
 				pblock.x = 0; 
 				
@@ -445,11 +513,13 @@ package
 				{
 					xmask.x = 0;
 					pmask.x = 0;
+					maskedShadow.x = 0;
 				}
 				if (pagePosition == TYPE_RIGHT)
 				{
 					xmask.x = Main.pageWidth;
 					pmask.x = Main.pageWidth;
+					maskedShadow.x = Main.pageWidth;
 				}
 			}
 			
@@ -461,6 +531,14 @@ package
 			{
 				xpage.x = 0;
 			}
+			
+			
+			shadowMaskBlock.x = xmedia.x;
+			shadowMaskBlock.y = xmedia.y;
+			
+			shadowMask.x = xpage.x;
+			shadowMask.y = xpage.y;
+			shadowMask.rotation = xpage.rotation;
 		}
 		
 		public function render()
@@ -496,7 +574,6 @@ package
 				neary = -Main.pageHalfHeight
 				fary = Main.pageHalfHeight;
 			}
-			
 			
 			// RADIUS 1 SECTION
 		
@@ -554,8 +631,8 @@ package
 				bisectorAngle 		= Math.atan2(neary - bisector.y, Main.pageWidth + bisector.x);
 				bisectorTanget 		= bisector.x + Math.tan(bisectorAngle) * (neary - bisector.y);
 				
-				tangentBottom.x 	= bisectorTanget;
-				tangentBottom.y 	= neary;
+				//tangentBottom.x 	= bisectorTanget;
+				//tangentBottom.y 	= neary;
 				
 				if (bisectorTanget > 0)
 					bisectorTanget = 0;
@@ -568,13 +645,15 @@ package
 				bisectorAngle 		= Math.atan2(neary - bisector.y, Main.pageWidth - bisector.x);
 				bisectorTanget 		= bisector.x - Math.tan(bisectorAngle) * (neary - bisector.y);
 				
-				tangentBottom.x 	= bisectorTanget;
-				tangentBottom.y 	= neary;
+				//tangentBottom.x 	= bisectorTanget;
+				//tangentBottom.y 	= neary;
             
 				if (bisectorTanget < 0)
 					bisectorTanget = 0;
 			}
 				
+			tangentBottom.x = bisectorTanget;
+			tangentBottom.y = neary;
 
 			// DETERMINE THE tangentToCorner FOR THE ANGLE OF THE PAGE
             tangentToCornerAngle = Math.atan2(tangentBottom.y - corner.y, tangentBottom.x - corner.x);
@@ -597,9 +676,33 @@ package
 			pmask.rotation = xmask.rotation;
 			pmask.x = xmask.x;
 
+			maskedShadow.rotation = xmask.rotation;
+			maskedShadow.x = xmask.x;
+			
+			
+			
+			shadowMask.x = xpage.x;
+			shadowMask.y = xpage.y;
+			shadowMask.rotation = xpage.rotation;
+			
+			/*var py:Number = -Main.pageHalfHeight;
+			var px:Number = tangentBottom.x + Main.pageHeight / Math.tan(tanAngle);
+			if (px > Main.pageWidth)
+			{
+				px = Main.pageWidth;
+				py = tangentBottom.y - (Main.pageWidth - tangentBottom.x)  * Math.tan(tanAngle);
+			}
+			
+			maskedShadow.scaleY = Math.sqrt(
+				(neary - py) * (neary - py) + 
+				(tangentBottom.x - px)  * (tangentBottom.x - px)
+			) / Main.pageHeight;*/
+			
 			// DEBUG AREA
 			{
 				clearDots();
+				
+				//addDot(px, py, "DD");
 				
 				drawLine(0, 0, follow.x, follow.y, Main.grey);
 				drawLine(follow.x, follow.y, -Main.pageWidth, Main.pageHalfHeight, Main.grey);
@@ -635,8 +738,8 @@ package
 					addDot(bisector.x, Main.pageHalfHeight, "T1");
 					addDot(tangentBottom.x, tangentBottom.y, "T2");
 					
-					drawDemoCircle(0, Main.pageHalfHeight, Main.pageWidth, "");
-					drawDemoCircle(0, -Main.pageHalfHeight, Main.pageDiagonal, "");
+					//drawDemoCircle(0, Main.pageHalfHeight, Main.pageWidth, "");
+					//drawDemoCircle(0, -Main.pageHalfHeight, Main.pageDiagonal, "");
 				}
 				if (dragtype == DRAG_TOP)
 				{
@@ -648,8 +751,8 @@ package
 					addDot(bisector.x, -Main.pageHalfHeight, "T1");
 					addDot(tangentBottom.x, tangentBottom.y, "T2");
 					
-					drawDemoCircle(0, -Main.pageHalfHeight, Main.pageWidth, "");
-					drawDemoCircle(0, Main.pageHalfHeight, Main.pageDiagonal, "");
+					//drawDemoCircle(0, -Main.pageHalfHeight, Main.pageWidth, "");
+					//drawDemoCircle(0, Main.pageHalfHeight, Main.pageDiagonal, "");
 				}
 				
 				/*var r0: Point = dots.globalToLocal(maskAngle.localToGlobal(new Point(- maskSize.x, -85)));
@@ -677,7 +780,7 @@ package
 			dots.y = Main.origin.y;
 			addChild(dots);
 			
-			dots.visible = false;
+			//dots.visible = false;
 		}
 		
 		private function addDot(x: Number, y: Number, s:String)

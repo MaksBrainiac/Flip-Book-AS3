@@ -40,6 +40,8 @@
 		public static var maskHeight:Number 	= 0;
 		public static var maskWidth:Number 		= 0;
 		
+		public static var shadowWidth:Number 	= 20;
+		
 		public static var origin:Point;
 
 		public static var pagesContent:/*MovieClip*/Array = [];
@@ -51,7 +53,7 @@
 		private var pagesLeft:/*XPage*/Array = [];
 		private var pagesRight:/*XPage*/Array = [];
 
-		private var pagesCount: int = 4;
+		private var pagesCount: int = 2;
 		
 		private var dragPage: XPage;
 		
@@ -79,8 +81,8 @@
 			fixedRadius 	= pageWidth;
 			pageDiagonal 	= Math.sqrt(pageWidth * pageWidth + pageHeight * pageHeight);
 			
-			maskHeight 		= pageHeight + 2 * pageWidth;
-			maskWidth		= pageDiagonal;
+			maskHeight 		= 2 * pageHeight + 2 * pageWidth;
+			maskWidth		= pageDiagonal * 2;
 			
 			// Points
 			origin 		= new Point(pageWidth, pageHalfHeight);
