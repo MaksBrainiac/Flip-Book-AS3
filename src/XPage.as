@@ -146,7 +146,7 @@ package
 			// ------------------ Create Inner Diagonal Shadow ----------------------------------------------- //
 			back_ishadow_clip = new GUIShadow();
 			back_ishadow_clip.scaleX = Main.shadowWidth / 100;
-			back_ishadow_clip.scaleY = Main.pageDiagonal / 100;
+			back_ishadow_clip.scaleY = Main.maskHeight / 100;
 
 			if (pageType == TYPE_RIGHT)
 				back_ishadow_clip.rotation = 180;
@@ -173,7 +173,7 @@ package
 			// ------------------ Create Outer Diagonal Shadow ----------------------------------------------- //
 			back_oshadow_clip = new GUIShadow();
 			back_oshadow_clip.scaleX = Main.shadowWidth / 100;
-			back_oshadow_clip.scaleY = Main.pageDiagonal / 100;
+			back_oshadow_clip.scaleY = Main.maskHeight / 100;
 
 			if (pageType == TYPE_LEFT)
 				back_oshadow_clip.rotation = 180;
@@ -452,7 +452,7 @@ package
 				back_media.y 			= - Main.pageHeight;
 				back_content.y 			= Main.pageHeight;
 
-				back_mblock.y 			= - Main.pageWidth - Main.pageHeight * 1.5;
+				back_mblock.y 			= - Main.maskBefore - Main.pageHeight;
 				back_mask.y 			= Main.pageHeight;
 			}
 			if (dragtype == DRAG_TOP)
@@ -460,7 +460,7 @@ package
 				back_media.y 			= 0;
 				back_content.y 			= 0;
 				
-				back_mblock.y 			= - Main.pageWidth - Main.pageHeight * 0.5;
+				back_mblock.y 			= - Main.maskBefore;
 				back_mask.y 			= 0;
 			}
 			
@@ -510,13 +510,13 @@ package
 			{
 				if (dragtype == DRAG_BOTTOM)
 				{
-					back_ishadow_clip.y 	= 0;
-					back_oshadow_clip.y		= -Main.pageDiagonal;
+					back_ishadow_clip.y 	= Main.maskBefore; 
+					back_oshadow_clip.y		= -Main.maskBefore - Main.pageHeight;
 				}
 				if (dragtype == DRAG_TOP)
 				{
-					back_ishadow_clip.y 	= Main.pageDiagonal;
-					back_oshadow_clip.y		= 0;
+					back_ishadow_clip.y 	= Main.maskBefore + Main.pageHeight;
+					back_oshadow_clip.y		= -Main.maskBefore;
 				}
 			}
 			if (pageType == TYPE_LEFT)
@@ -524,12 +524,12 @@ package
 				if (dragtype == DRAG_BOTTOM)
 				{
 					back_ishadow_clip.y 	= -Main.pageDiagonal;
-					back_oshadow_clip.y		= 0;
+					back_oshadow_clip.y		= Main.maskBefore;
 				}
 				if (dragtype == DRAG_TOP)
 				{
-					back_ishadow_clip.y 	= 0;
-					back_oshadow_clip.y		= Main.pageDiagonal;
+					back_ishadow_clip.y 	= -Main.maskBefore;
+					back_oshadow_clip.y		= Main.maskBefore + Main.pageHeight;
 				}
 			}
 			

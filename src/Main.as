@@ -39,8 +39,9 @@
 		
 		public static var maskHeight:Number 	= 0;
 		public static var maskWidth:Number 		= 0;
+		public static var maskBefore:Number 	= 0;
 		
-		public static var shadowWidth:Number 	= 20;
+		public static var shadowWidth:Number 	= 10;
 		
 		public static var origin:Point;
 
@@ -83,6 +84,7 @@
 			
 			maskHeight 		= 2 * pageHeight + 2 * pageWidth;
 			maskWidth		= pageDiagonal * 2;
+			maskBefore		= (maskHeight - pageHeight) / 2;
 			
 			// Points
 			origin 		= new Point(pageWidth, pageHalfHeight);
