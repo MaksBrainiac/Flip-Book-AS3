@@ -47,24 +47,23 @@
 		
 		public static var origin:Point;
 
-		public static var pagesInfo:/*MovieClip*/Array = [];
-		public static var pagesContent:/*MovieClip*/Array = [];
+		private var pagesCount: int = 2;
+		public static var pages:/*PageObject*/Array = [];
+		private var pagesLeft:/*XPage*/Array = [];
+		private var pagesRight:/*XPage*/Array = [];
+		
+		//public static var pagesContent:/*MovieClip*/Array = [];
+		
 		public static var originArea:MovieClip;
 		
 		public var loadQuee:Array = [];
 		
 		private var layoutRoot:MovieClip;
 		private var pageArea:MovieClip;
-
-		private var pagesLeft:/*XPage*/Array = [];
-		private var pagesRight:/*XPage*/Array = [];
-
-		private var pagesCount: int = 10;
-		
 		private var dragPage: XPage;
 		
 		private var dataURL:String = "pages.xml";
-		private var currentPage:int = 0; // Only even (0,2,4,6...) numbers
+		private var currentPage:int = 0; // On The Right Side, Only even (0,2,4,6...) numbers
 		
 		private var urlRequest:URLRequest;
 		private var urlLoader:URLLoader;
@@ -81,49 +80,57 @@
 		{
 			if (loaderInfo.parameters['data'])
 				dataURL = loaderInfo.parameters['data'];
-				
-				
+
 			urlRequest = new URLRequest(dataURL);
 			urlLoader = new URLLoader(urlRequest);
 			
 			urlLoader.addEventListener(Event.COMPLETE, onConfigLoadComplete);
+			urlLoader.load(urlRequest);
 		}
 		
 		private function onConfigLoadComplete(e:Event):void 
 		{
 			var xml:XML = new XML(urlLoader.data);
-			if (xml.name() != 'data') return; // DIE!!! Wrong Config!
+			if (xml.name() != 'data') {
+				trace("Bad Config");
+				return; // DIE!!! Wrong Config!
+			}
+		
+			//trace(xml.toXMLString());
 			
 			pageWidth = Number(xml.@width);
 			pageHeight = Number(xml.@height);
 			
 			for each (var pageXML:XML in xml.page)
 			{
-				var pageInfo:PageInfo = new PageInfo();
-				pageInfo.number = int(pageXML.@number);
+				var pageObject:PageObject = new PageObject();
+				pageObject.number = int(pageXML.@number);
 
-				pageInfo.pageWidth = Number(pageXML.@width);
-				pageInfo.pageHeight = Number(pageXML.@height);
+				pageObject.pageWidth = Main.pageWidth;
+				pageObject.pageHeight = Main.pageHeight;
 				
-				pageInfo.src = String(pageXML.@src);
-				pageInfo.large = String(pageXML.@large);
-				pageInfo.href = String(pageXML.@href);
+				pageObject.src = String(pageXML.@src);
+				pageObject.large = String(pageXML.@large);
+				pageObject.href = String(pageXML.@href);
 				
-				pageInfo.marginTop = Number(pageXML.@marginTop);
-				pageInfo.marginBottom = Number(pageXML.@marginBottom);
+				pageObject.marginTop = Number(pageXML.@marginTop);
+				pageObject.marginBottom = Number(pageXML.@marginBottom);
 				
-				pageInfo.resize = Boolean(pageXML.@resize);
+				pageObject.resize = Boolean(pageXML.@resize);
 				
-				pagesInfo.push(pageInfo);
-				addPageToLoad(pageInfo);
+				pages.push(pageObject);
+				addPageToLoad(pageObject);
 			}
 			
-			pagesCount = pagesInfo.length;
-			
+			pagesCount = pages.length;
 			initializeBook();
+			
+			//var i;
+			//for (i = 0; i < pagesCount; i++)
+			//	addPageToLoad(pageObject);
 		}
 		
-		private function addPageToLoad(page:PageInfo)
+		private function addPageToLoad(page:PageObject)
 		{
 			loadQuee.push(page);
 			if (loadQuee.length == 1) loadNextPage();
@@ -131,7 +138,7 @@
 		
 		private function loadNextPage()
 		{
-			var page:PageInfo = loadQuee[0];
+			var page:PageObject = loadQuee[0];
 			page.addEventListener("PageLoadComplete", onPageLoaded);
 			page.loadContent();
 		}
@@ -250,9 +257,9 @@
 		
 		public static function getPageContent(i:int, position:String): MovieClip
 		{
-			return pagesInfo[i];
+			return pages[i];
 			
-			if (pagesContent[i] == null)
+			/*if (pagesContent[i] == null)
 			{
 				var pageClass:Class = Class(getDefinitionByName("GUIPage" + i % 6));
 				var content:MovieClip = new pageClass(); 
@@ -261,7 +268,7 @@
 				content.cap.caption2.text = i; //  .toString();
 				content.cap.caption3.text = i; //  .toString();
 				pagesContent[i] = content;
-			}
+			}*/
 			
 			//trace("Show Page", i);
 			return pagesContent[i];
