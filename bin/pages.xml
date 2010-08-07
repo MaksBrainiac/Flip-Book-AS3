@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<data width="250" height="300">
+	<page number="0" src="pages/pic2.png" large="" href="" marginTop="20" marginBottom="0" resize="0" />
+	<page number="1" src="pages/pic2.png" large="" href="" marginTop="20" marginBottom="0" resize="0" />
+	
+	<_page number="0" src="pages/pic0.png" large="" href="" marginTop="0" marginBottom="0" resize="0" />
+	<_page number="1" src="pages/pic0.png" large="" href="" marginTop="0" marginBottom="0" resize="0" />
+	
+	<_page number="2" src="pages/pic1.png" large="" href="" marginTop="20" marginBottom="0" resize="0" />
+	<_page number="3" src="pages/pic1.png" large="" href="" marginTop="20" marginBottom="0" resize="0" />
+	
+</data>
