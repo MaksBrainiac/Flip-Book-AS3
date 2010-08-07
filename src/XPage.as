@@ -1,6 +1,5 @@
 package 
 {
-	import com.maksimus.ObjectEvent;
 	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.MouseEvent;

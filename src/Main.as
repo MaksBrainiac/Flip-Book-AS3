@@ -8,6 +8,8 @@
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import flash.net.URLLoader;
+	import flash.net.URLRequest;
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
 	import flash.utils.getDefinitionByName;
@@ -45,8 +47,11 @@
 		
 		public static var origin:Point;
 
+		public static var pagesInfo:/*MovieClip*/Array = [];
 		public static var pagesContent:/*MovieClip*/Array = [];
 		public static var originArea:MovieClip;
+		
+		public var loadQuee:Array = [];
 		
 		private var layoutRoot:MovieClip;
 		private var pageArea:MovieClip;
@@ -58,6 +63,11 @@
 		
 		private var dragPage: XPage;
 		
+		private var dataURL:String = "pages.xml";
+		private var currentPage:int = 0; // Only even (0,2,4,6...) numbers
+		
+		private var urlRequest:URLRequest;
+		private var urlLoader:URLLoader;
 		
 		/**
 		 * Main Constructor
@@ -65,17 +75,85 @@
 		public function Main():void 
 		{
 			init();
+		}
+		
+		private function init():void
+		{
+			if (loaderInfo.parameters['data'])
+				dataURL = loaderInfo.parameters['data'];
+				
+				
+			urlRequest = new URLRequest(dataURL);
+			urlLoader = new URLLoader(urlRequest);
 			
-			stage.addEventListener(MouseEvent.MOUSE_MOVE, mouseMoveHandler);
-			stage.addEventListener(MouseEvent.MOUSE_UP, mouseButtonUpHandler);
+			urlLoader.addEventListener(Event.COMPLETE, onConfigLoadComplete);
+		}
+		
+		private function onConfigLoadComplete(e:Event):void 
+		{
+			var xml:XML = new XML(urlLoader.data);
+			if (xml.name() != 'data') return; // DIE!!! Wrong Config!
 			
-			//enterFrameHandler(null);
+			pageWidth = Number(xml.@width);
+			pageHeight = Number(xml.@height);
+			
+			for each (var pageXML:XML in xml.page)
+			{
+				var pageInfo:PageInfo = new PageInfo();
+				pageInfo.number = int(pageXML.@number);
+
+				pageInfo.pageWidth = Number(pageXML.@width);
+				pageInfo.pageHeight = Number(pageXML.@height);
+				
+				pageInfo.src = String(pageXML.@src);
+				pageInfo.large = String(pageXML.@large);
+				pageInfo.href = String(pageXML.@href);
+				
+				pageInfo.marginTop = Number(pageXML.@marginTop);
+				pageInfo.marginBottom = Number(pageXML.@marginBottom);
+				
+				pageInfo.resize = Boolean(pageXML.@resize);
+				
+				pagesInfo.push(pageInfo);
+				addPageToLoad(pageInfo);
+			}
+			
+			pagesCount = pagesInfo.length;
+			
+			initializeBook();
+		}
+		
+		private function addPageToLoad(page:PageInfo)
+		{
+			loadQuee.push(page);
+			if (loadQuee.length == 1) loadNextPage();
+		}
+		
+		private function loadNextPage()
+		{
+			var page:PageInfo = loadQuee[0];
+			page.addEventListener("PageLoadComplete", onPageLoaded);
+			page.loadContent();
+		}
+		
+		private function onPageLoaded(e:Event):void 
+		{
+			loadQuee.shift();
+			if (loadQuee.length > 0) loadNextPage();
+		}
+		
+		private function gotoPage(page:int)
+		{
+			if (page % 2 == 1) page++;
+			if (page == currentPage) return;
+			
+			// TODO: 
 		}
 		
 		/**
 		 * Initialize interface, calculate defaults
 		 */
-		public function init()
+		public function initializeBook()
 		{
 			// Once calculatable variables
 			pageHalfHeight 	= pageHeight * 0.5;
@@ -136,6 +214,9 @@
 				//pagesRight[i].visible = false;
 			}
 			// ----------------- Create Pages ------------------------------------- //
+			
+			stage.addEventListener(MouseEvent.MOUSE_MOVE, mouseMoveHandler);
+			stage.addEventListener(MouseEvent.MOUSE_UP, mouseButtonUpHandler);
 		}
 		
 		private function __createPageArea():MovieClip
@@ -169,6 +250,8 @@
 		
 		public static function getPageContent(i:int, position:String): MovieClip
 		{
+			return pagesInfo[i];
+			
 			if (pagesContent[i] == null)
 			{
 				var pageClass:Class = Class(getDefinitionByName("GUIPage" + i % 6));
