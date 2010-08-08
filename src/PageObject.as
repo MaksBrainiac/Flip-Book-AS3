@@ -26,11 +26,12 @@ package
 		public var marginBottom:Number;
 		
 		public var marginLeft:Number;
+		public var marginRight:Number;
 		
 		public var pageWidth:Number;
 		public var pageHeight:Number;
 		
-		public var resize:Boolean;
+		public var resize:int;
 		public var loaded:Boolean = false;
 		
 		public var loader:Loader;

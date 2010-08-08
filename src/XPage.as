@@ -28,7 +28,7 @@ package
 		
 		public var back_side:MovieClip;
 			public var back_content:MovieClip;
-				public var back_media:MovieClip;
+				public var back_media:PageObject;
 		public var back_mask:MovieClip;
 			public var back_mblock:MovieClip;
 		public var back_inner_shadow:MovieClip;
@@ -45,7 +45,7 @@ package
 		public var frontPage:MovieClip;
 		
 			public var front_side:MovieClip;
-				public var front_media:MovieClip;
+				public var front_media:PageObject;
 				public var front_side_shadow:MovieClip;
 					public var front_sshadow_clip:MovieClip;
 				public var hotCornerTop:MovieClip;
@@ -89,7 +89,24 @@ package
 		public var dragtype:String = DRAG_BOTTOM;
 		public var clicktime:int = 0;
 		
+		//public var back_side:PageObject;
+		//public var front_side:PageObject;
 		
+		public var pageWidth:Number;
+		public var pageHeight:Number;
+		public var pageDiagonal:Number;
+		
+		public var pagePositionUp:Number;
+		public var pagePositionDown:Number;
+		
+		public var marginTop:Number;
+		public var marginBottom:Number;
+		public var marginLeft:Number;
+		public var marginRight:Number;
+		
+		public var maskHeight:Number;
+		public var maskWidth:Number;
+		public var maskBefore:Number;
 		
 		public function XPage(index:int, type:String)
 		{
@@ -119,6 +136,32 @@ package
 			
 			// ------------------ Create Back Page ----------------------------------------------------------- //
 			back_media = Main.getPageContent(back, type);
+			
+			pageWidth = back_media.pageWidth + back_media.marginLeft + back_media.marginRight;
+			pageHeight = back_media.pageHeight + back_media.marginTop + back_media.marginBottom;
+			
+			pagePositionUp = -back_media.marginTop; // instead of 0
+			pagePositionDown = back_media.pageHeight + back_media.marginBottom;
+			
+			pageDiagonal 	= Math.sqrt(pageWidth * pageWidth + pageHeight * pageHeight);
+			
+			
+			
+			marginLeft = back_media.marginLeft;
+			marginRight = back_media.marginRight;
+			marginTop = back_media.marginTop;
+			marginBottom = back_media.marginBottom;
+			
+			maskHeight 		= 2 * pageHeight + 2 * pageWidth;
+			maskWidth		= pageDiagonal * 2;
+			maskBefore		= (maskHeight - pageHeight) / 2;
+			
+			
+			
+			
+			
+			
+			
 			
 			back_content  = new MovieClip();
 			back_content.addChild(back_media); // Центр расположен в углу за который выполнятется перетягивание
@@ -274,16 +317,16 @@ package
 			
 			if (pageType == TYPE_RIGHT)
 			{
-				hotCornerTop.x = 2 * Main.pageWidth - Main.cornerSize;
-				hotCornerBottom.x = 2 * Main.pageWidth - Main.cornerSize;
+				hotCornerTop.x = Main.pageWidth + this.pageWidth - Main.cornerSize;
+				hotCornerBottom.x = Main.pageWidth + this.pageWidth - Main.cornerSize;
 			}
 			if (pageType == TYPE_LEFT)
 			{
-				hotCornerTop.x = 0;
-				hotCornerBottom.x = 0;	
+				hotCornerTop.x = Main.pageWidth - this.pageWidth;
+				hotCornerBottom.x = Main.pageWidth - this.pageWidth;	
 			}
-			hotCornerTop.y = 0;
-			hotCornerBottom.y = Main.pageHeight - Main.cornerSize;
+			hotCornerTop.y = - this.marginTop;
+			hotCornerBottom.y = Main.pageHeight + this.marginBottom - Main.cornerSize;
 			
 			front_side.addChild(hotCornerTop);
 			front_side.addChild(hotCornerBottom);

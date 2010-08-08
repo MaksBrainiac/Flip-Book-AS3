@@ -115,8 +115,11 @@
 				
 				pageObject.marginTop = Number(pageXML.@marginTop);
 				pageObject.marginBottom = Number(pageXML.@marginBottom);
+
+				pageObject.marginLeft = Number(pageXML.@marginLeft);
+				pageObject.marginRight = Number(pageXML.@marginRight);
 				
-				pageObject.resize = Boolean(pageXML.@resize);
+				pageObject.resize = int(pageXML.@resize);
 				
 				pages.push(pageObject);
 				addPageToLoad(pageObject);
@@ -255,7 +258,7 @@
 			return page;
 		}
 		
-		public static function getPageContent(i:int, position:String): MovieClip
+		public static function getPageContent(i:int, position:String): PageObject
 		{
 			return pages[i];
 			
@@ -271,7 +274,12 @@
 			}*/
 			
 			//trace("Show Page", i);
-			return pagesContent[i];
+			//return pagesContent[i];
+		}
+		
+		public static function getPage(i:int)
+		{
+			return pages[i];
 		}
 		
 		public static function getMouseOriginPosition():Point
