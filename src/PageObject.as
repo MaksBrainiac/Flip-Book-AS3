@@ -16,7 +16,7 @@ package
 	 */
 	public class PageObject extends MovieClip
 	{
-		public var number:int;
+		public var index:int;
 		
 		public var src:String;
 		public var large:String;
@@ -65,7 +65,7 @@ package
 		{
 			if (resize)
 			{
-				loader.scaleX = pageWidth  / loader.content.width;
+				loader.scaleX = (pageWidth + marginLeft + marginRight) / loader.content.width;
 				loader.scaleY = (pageHeight + marginTop + marginBottom)  / loader.content.height;
 				
 				if (loader.content is Bitmap)
@@ -95,7 +95,6 @@ package
             loader.load(urlRequest);
 			
 			addChild(loader);
-			loader.y = -marginTop;
 		}
 		
 	}

@@ -23,50 +23,30 @@
 		public static const TOOLBAR_BOTTOM_HEIGHT:Number 	= 0;
 		public static const TOOLBAR_TOP_HEIGHT:Number 		= 0;
 		
-		public static const grey:uint 						= 0x666666;
-		public static const red:uint 						= 0xFF0000;
-		public static const blue:uint 						= 0x0000FF;
-
-		public static var clickSpeed:Number 	= 500;
+		private var clickSpeed:Number 		= 500;
+		private var pageWidth:Number 		= 250;
+		private var pageHeight:Number 		= 300;
+		private var pageHalfHeight:Number 	= 0;
+		private var cornerSize:Number 		= 70;
+		private var animationSpeed:Number	= 0.2;
+		private var shadowWidth:Number 		= 10;
 		
-		public static var pageWidth:Number 		= 250;
-		public static var pageHeight:Number 	= 300;
-		public static var pageHalfHeight:Number = 0;
-		
-		public static var cornerSize:Number 	= 70;
-		public static var animationSpeed:Number	= 0.2;
-		
-		public static var fixedRadius:Number 	= 0;
-        public static var pageDiagonal:Number 	= 0;
-		
-		public static var maskHeight:Number 	= 0;
-		public static var maskWidth:Number 		= 0;
-		public static var maskBefore:Number 	= 0;
-		
-		public static var shadowWidth:Number 	= 10;
-		
-		public static var origin:Point;
-
 		private var pagesCount: int = 2;
-		public static var pages:/*PageObject*/Array = [];
+		private var pages:/*PageObject*/Array = [];
 		private var pagesLeft:/*XPage*/Array = [];
 		private var pagesRight:/*XPage*/Array = [];
-		
-		//public static var pagesContent:/*MovieClip*/Array = [];
-		
-		public static var originArea:MovieClip;
-		
-		public var loadQuee:Array = [];
+		private var loadQuee:Array = [];
 		
 		private var layoutRoot:MovieClip;
-		private static var pageArea:MovieClip;
+		private var pageArea:MovieClip;
 		private var dragPage: XPage;
 		
 		private var dataURL:String = "pages.xml";
-		private var currentPage:int = 0; // On The Right Side, Only even (0,2,4,6...) numbers
 		
 		private var urlRequest:URLRequest;
 		private var urlLoader:URLLoader;
+
+		private var currentPage:int = 0; // On The Right Side, Only even (0,2,4,6...) numbers		
 		
 		/**
 		 * Main Constructor
@@ -101,13 +81,15 @@
 			pageWidth = Number(xml.@width);
 			pageHeight = Number(xml.@height);
 			
+			var i:int = 0;
+			
 			for each (var pageXML:XML in xml.page)
 			{
 				var pageObject:PageObject = new PageObject();
-				pageObject.number = int(pageXML.@number);
+				pageObject.index = i++;
 
-				pageObject.pageWidth = Main.pageWidth;
-				pageObject.pageHeight = Main.pageHeight;
+				pageObject.pageWidth = pageWidth;
+				pageObject.pageHeight = pageHeight;
 				
 				pageObject.src = String(pageXML.@src);
 				pageObject.large = String(pageXML.@large);
@@ -157,41 +139,32 @@
 			if (page % 2 == 1) page++;
 			if (page == currentPage) return;
 			
-			// TODO: 
+			// TODO: добавить функционал перехода на заданную страницу
 		}
 		
 		/**
 		 * Initialize interface, calculate defaults
 		 */
-		public function initializeBook()
+		private function initializeBook()
 		{
 			// Once calculatable variables
 			pageHalfHeight 	= pageHeight * 0.5;
-			fixedRadius 	= pageWidth;
-			pageDiagonal 	= Math.sqrt(pageWidth * pageWidth + pageHeight * pageHeight);
+//			fixedRadius 	= pageWidth;
+//			pageDiagonal 	= Math.sqrt(pageWidth * pageWidth + pageHeight * pageHeight);
 			
-			maskHeight 		= 2 * pageHeight + 2 * pageWidth;
-			maskWidth		= pageDiagonal * 2;
-			maskBefore		= (maskHeight - pageHeight) / 2;
-			
-			// Points
-			origin 		= new Point(pageWidth, pageHalfHeight);
+//			maskHeight 		= 2 * pageHeight + 2 * pageWidth;
+//			maskWidth		= pageDiagonal * 2;
+//			maskBefore		= (maskHeight - pageHeight) / 2;
 			
 			// ----------------- Draw Basic Interface ----------------------------- //
 			layoutRoot = new MovieClip();
-			layoutRoot.x = (stage.stageWidth - pageWidth * 2) / 2;
-			layoutRoot.y = (stage.stageHeight - TOOLBAR_BOTTOM_HEIGHT - TOOLBAR_TOP_HEIGHT - pageHeight) / 2;
+			layoutRoot.x = 0; // (stage.stageWidth - pageWidth * 2) / 2;
+			layoutRoot.y = 0; // (stage.stageHeight - TOOLBAR_BOTTOM_HEIGHT - TOOLBAR_TOP_HEIGHT - pageHeight) / 2;
 			addChild(layoutRoot);
 			
-			originArea = new MovieClip();
-			originArea.x = origin.x;
-			originArea.y = origin.y;
-			
 			pageArea = __createPageArea(); 
-			pageArea.y = pageHalfHeight;
-			pageArea.x = pageWidth;
-			
-			pageArea.addChild(originArea);
+			pageArea.y = (stage.stageHeight - TOOLBAR_BOTTOM_HEIGHT - TOOLBAR_TOP_HEIGHT) / 2 + TOOLBAR_TOP_HEIGHT;
+			pageArea.x = stage.stageWidth / 2;
 			layoutRoot.addChild(pageArea);
 			// ----------------- Draw Basic Interface ----------------------------- //
 			
@@ -255,40 +228,17 @@
 
 		private function __createPage(index:int, type:String)
 		{
-			var page:MovieClip = new XPage(index, type);
+			var page:MovieClip = new XPage(index, type, getPage(2 * index), getPage(2 * index + 1), 
+				{ cornerSize: cornerSize, shadowWidth:shadowWidth, pageHeight: pageHeight, clickSpeed: clickSpeed, animationSpeed: animationSpeed } 
+			);
 			page.addEventListener("AnimationStarted", page_onStartAnimation);
 			page.addEventListener("AnimationComplete", page_onStopAnimation);
 			return page;
 		}
 		
-		public static function getPageContent(i:int, position:String): PageObject
+		private function getPage(i:int)
 		{
 			return pages[i];
-			
-			/*if (pagesContent[i] == null)
-			{
-				var pageClass:Class = Class(getDefinitionByName("GUIPage" + i % 6));
-				var content:MovieClip = new pageClass(); 
-				content.cap.caption0.text = i; //  .toString();
-				content.cap.caption1.text = i; //  .toString();
-				content.cap.caption2.text = i; //  .toString();
-				content.cap.caption3.text = i; //  .toString();
-				pagesContent[i] = content;
-			}*/
-			
-			//trace("Show Page", i);
-			//return pagesContent[i];
-		}
-		
-		public static function getPage(i:int)
-		{
-			return pages[i];
-		}
-		
-		public static function getMouseOriginPosition():Point
-		{
-			var p:Point = new Point(pageArea.mouseX, pageArea.mouseY);
-			return p;
 		}
 		
 		private function mouseMoveHandler(e:MouseEvent):void 
