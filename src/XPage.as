@@ -300,6 +300,20 @@ package
 			addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
 		
+		public override function toString():String
+		{
+			return "Page" 
+						+ index 
+						+ " (" 
+						+ (pagePosition == TYPE_LEFT ? "L" : "R") 
+						+ (dragtype == DRAG_TOP ? "↑" : "↓")
+						+ (active ? "D" : "_")
+						+ (animated ? "@" : "_")
+						+ (hover ? "H" : "_")
+						+ (visible ? "*" : "_") 						
+						+  ")";
+		}
+		
 		public function regenerateContent()
 		{
 			if (back_media.parent != null) back_media.parent.removeChild(back_media);
@@ -373,7 +387,31 @@ package
 			activateHover(DRAG_TOP);
 		}
 		
-		private function activateHover(dragtype:String)
+		public function flip():Boolean
+		{
+			if (active) return false;
+			if (animated) return false;
+			
+			dragtype = DRAG_BOTTOM;
+		
+			var yPos:Number = pagePositionDown;
+			var xPos:Number = 0;
+
+			if (pagePosition == TYPE_LEFT)
+				xPos = -pageWidth;
+			else
+				xPos = pageWidth;
+			
+			follow = new Point(xPos, yPos);	
+			mouse = new Point(-xPos, yPos);	
+
+			active = false;
+			animated = true;
+			
+			return true;
+		}
+		
+		public function activateHover(dragtype:String = DRAG_BOTTOM)
 		{
 			this.dragtype = dragtype;
 			
@@ -399,7 +437,7 @@ package
 			resetPosition();
 		}
 		
-		private function activateDrag(dragtype:String)
+		public function activateDrag(dragtype:String)
 		{
 			this.dragtype = dragtype;
 			

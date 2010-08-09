@@ -1,18 +1,23 @@
 ﻿package 
 {
+	import com.maksbrainiac.events.ObjectEvent;
 	import fl.motion.Color;
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
 	import flash.display.CapsStyle;
 	import flash.display.JointStyle;
 	import flash.events.Event;
+	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
 	import flash.geom.Point;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
+	import flash.ui.Keyboard;
 	import flash.utils.getDefinitionByName;
+	import flash.utils.Timer;
 	
 	/**
 	 * ...
@@ -29,7 +34,7 @@
 		private var pageHalfHeight:Number 	= 0;
 		private var cornerSize:Number 		= 70;
 		private var animationSpeed:Number	= 0.2;
-		private var shadowWidth:Number 		= 10;
+		private var shadowWidth:Number 		= 50;
 		
 		private var pagesCount: int = 2;
 		private var pages:/*PageObject*/Array = [];
@@ -46,7 +51,12 @@
 		private var urlRequest:URLRequest;
 		private var urlLoader:URLLoader;
 
-		private var currentPage:int = 0; // On The Right Side, Only even (0,2,4,6...) numbers		
+		private var _currentPage:int = 0; // On The Right Side, Only even (0,2,4,6...) numbers		
+		private var followPage:int = 0; // On The Right Side, Only even (0,2,4,6...) numbers		
+		
+		private var pageTimer:Timer;
+		
+		private var flipSpeed:Number = 200;
 		
 		/**
 		 * Main Constructor
@@ -81,6 +91,8 @@
 			pageWidth = Number(xml.@width);
 			pageHeight = Number(xml.@height);
 			
+			pageHalfHeight 	= pageHeight * 0.5;
+			
 			var i:int = 0;
 			
 			for each (var pageXML:XML in xml.page)
@@ -109,10 +121,6 @@
 			
 			pagesCount = pages.length;
 			initializeBook();
-			
-			//var i;
-			//for (i = 0; i < pagesCount; i++)
-			//	addPageToLoad(pageObject);
 		}
 		
 		private function addPageToLoad(page:PageObject)
@@ -138,28 +146,70 @@
 		{
 			if (page % 2 == 1) page++;
 			if (page == currentPage) return;
+			if (page < 0) return;
+			if (page > pagesCount) return; // pagesCount!
 			
+			trace('goto Page', currentPage, page);
+			
+			var flipTimes:int = 0;
+			
+			if (page > currentPage) // Flip to left
+			{
+				//flipTimes = page - currentPage
+				
+				pagesRight[currentPage / 2 + 0].flip();
+			}
+			
+			if (page < currentPage) // Flip to right
+			{
+				pagesLeft[currentPage / 2 - 1].flip();
+			}
+			
+			pageTimer.start();
+			
+			currentPage = page;
 			// TODO: добавить функционал перехода на заданную страницу
 		}
+		
+		private function canFlipRight()
+		{
+			// Get top not active page
+			
+			var i;
+			//var canFlip:int = -1;
+			
+			for (i = currentPage / 2; i < pagesCount; i++)
+			{
+				if (pagesLeft[i].animated && pagesLeft[i].pagePosition == XPage.TYPE_LEFT)
+					break;
+					
+				if (!pagesRight[i].animated)
+					return i;
+			}
+			
+			return -1;
+		}
+		
+		private function canFlipLeft()
+		{
+			
+		}
+		
+		private function onPageTimer(e:TimerEvent):void 
+		{
+			//trace("timer trigger");
+		}
+
 		
 		/**
 		 * Initialize interface, calculate defaults
 		 */
 		private function initializeBook()
 		{
-			// Once calculatable variables
-			pageHalfHeight 	= pageHeight * 0.5;
-//			fixedRadius 	= pageWidth;
-//			pageDiagonal 	= Math.sqrt(pageWidth * pageWidth + pageHeight * pageHeight);
-			
-//			maskHeight 		= 2 * pageHeight + 2 * pageWidth;
-//			maskWidth		= pageDiagonal * 2;
-//			maskBefore		= (maskHeight - pageHeight) / 2;
-			
 			// ----------------- Draw Basic Interface ----------------------------- //
 			layoutRoot = new MovieClip();
-			layoutRoot.x = 0; // (stage.stageWidth - pageWidth * 2) / 2;
-			layoutRoot.y = 0; // (stage.stageHeight - TOOLBAR_BOTTOM_HEIGHT - TOOLBAR_TOP_HEIGHT - pageHeight) / 2;
+			layoutRoot.x = 0;
+			layoutRoot.y = 0;
 			addChild(layoutRoot);
 			
 			pageArea = __createPageArea(); 
@@ -203,6 +253,50 @@
 			
 			stage.addEventListener(MouseEvent.MOUSE_MOVE, mouseMoveHandler);
 			stage.addEventListener(MouseEvent.MOUSE_UP, mouseButtonUpHandler);
+			
+			stage.addEventListener(KeyboardEvent.KEY_UP, keyboardButtonUp);
+			stage.addEventListener(Event.ENTER_FRAME, debugInformation);
+			
+			pageTimer = new Timer(flipSpeed);
+			pageTimer.addEventListener(TimerEvent.TIMER, onPageTimer);
+			
+			addEventListener("PageChanged", onPageChanged);
+		}
+		
+		private function debugInformation(e:Event):void 
+		{
+			txt_pagesRight.text = pagesRight.toString();
+			txt_pagesLeft.text = pagesLeft.toString();
+		}
+		
+		private function keyboardButtonUp(e:KeyboardEvent):void 
+		{
+			switch (e.keyCode)
+			{
+				case Keyboard.LEFT:
+					gotoPage(currentPage + 2);
+					break;
+				case Keyboard.RIGHT:
+					gotoPage(currentPage - 2);
+					break;
+				case Keyboard.HOME:
+					gotoPage(0);
+					break;
+				case Keyboard.END:
+					gotoPage(pagesCount);
+					break;
+			}
+		}
+		
+		private function onPageChanged(e:ObjectEvent):void 
+		{
+			txt_pageNumber_right.text = e.object.page + 1;
+			txt_pageNumber_left.text = e.object.page + 0;
+
+			if (currentPage <=0)
+				txt_pageNumber_left.text = "";
+			if (currentPage >= pagesCount)
+				txt_pageNumber_right.text = ""
 		}
 		
 		private function __createPageArea():MovieClip
@@ -266,6 +360,7 @@
 		{
 			//trace("page:", e.target.pageType, "position:", e.target.pagePosition, "index:", e.target.index);
 			
+			
 			if (XPage(e.target).pagePosition == XPage.TYPE_LEFT) // Change visible page
 			{
 				//trace(XPage(e.target).pageType);
@@ -277,8 +372,9 @@
 				pagesLeft[XPage(e.target).index].frontPage.visible = true;	
 				pagesLeft[XPage(e.target).index].regenerateContent();
 				pagesLeft[XPage(e.target).index].resetPosition(XPage.TYPE_LEFT);
+				
+				currentPage = XPage(e.target).index * 2 + 2;
 			}
-			
 			if (XPage(e.target).pagePosition == XPage.TYPE_RIGHT) // Change visible page
 			{
 				//trace(XPage(e.target).pageType);
@@ -290,7 +386,10 @@
 				pagesRight[XPage(e.target).index].frontPage.visible = true;
 				pagesRight[XPage(e.target).index].regenerateContent();
 				pagesRight[XPage(e.target).index].resetPosition(XPage.TYPE_RIGHT);
+				
+				currentPage = XPage(e.target).index * 2;
 			}
+			dispatchEvent(new ObjectEvent("PageChanged", false, false, { "page": currentPage } ));
 		}
 		
 		private function page_onStartAnimation(e:Event):void 
@@ -298,6 +397,13 @@
 			dragPage = XPage(e.target);
 		}
 		
+		public function get currentPage():int { return _currentPage; }
+		
+		public function set currentPage(value:int):void 
+		{
+			_currentPage = value;
+			txt_currentPage.text = value.toString();
+		}
 	}
 	
 }
