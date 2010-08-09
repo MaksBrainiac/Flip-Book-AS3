@@ -52,7 +52,7 @@ package
 				public var hotCornerBottom:MovieClip;
 					
 			public var front_mask:MovieClip;
-			public var front_mblock:MovieClip;
+				public var front_mblock:MovieClip;
 			
 		/**
 		 * Mouse Position
@@ -317,16 +317,16 @@ package
 			
 			if (pageType == TYPE_RIGHT)
 			{
-				hotCornerTop.x = Main.pageWidth + this.pageWidth - Main.cornerSize;
-				hotCornerBottom.x = Main.pageWidth + this.pageWidth - Main.cornerSize;
+				hotCornerTop.x = Main.pageWidth + this.pageWidth - Main.cornerSize - Main.pageWidth;
+				hotCornerBottom.x = Main.pageWidth + this.pageWidth - Main.cornerSize - Main.pageWidth;
 			}
 			if (pageType == TYPE_LEFT)
 			{
-				hotCornerTop.x = Main.pageWidth - this.pageWidth;
-				hotCornerBottom.x = Main.pageWidth - this.pageWidth;	
+				hotCornerTop.x = Main.pageWidth - this.pageWidth - Main.pageWidth;
+				hotCornerBottom.x = Main.pageWidth - this.pageWidth - Main.pageWidth;	
 			}
-			hotCornerTop.y = - this.marginTop;
-			hotCornerBottom.y = Main.pageHeight + this.marginBottom - Main.cornerSize;
+			hotCornerTop.y = - this.marginTop - Main.pageHalfHeight;
+			hotCornerBottom.y = Main.pageHeight + this.marginBottom - Main.cornerSize - Main.pageHalfHeight;
 			
 			front_side.addChild(hotCornerTop);
 			front_side.addChild(hotCornerBottom);
@@ -431,7 +431,8 @@ package
 		{
 			clicktime = getTimer();
 			
-			if (mouseY > Main.pageHalfHeight)
+			//if (mouseY > Main.pageHalfHeight)
+			if (mouseY > 0)
 				activateDrag(DRAG_BOTTOM);
 			else
 				activateDrag(DRAG_TOP);
@@ -485,65 +486,65 @@ package
 
 			//trace("Reset position page:", pageType, "position:", pagePosition, "index:", index, "visible:", visible.toString(), "Dragtype: ", dragtype);	
 				
-			front_media.y = 0; 						// always
-			front_side_shadow.x = Main.pageWidth;	// always
-			front_side_shadow.y = 0;				// always
+			front_media.y = 0 - Main.pageHalfHeight;	// always
+			front_side_shadow.x = Main.pageWidth - Main.pageWidth;	// always
+			front_side_shadow.y = 0 - Main.pageHalfHeight;	// always
 			
 			if (dragtype == DRAG_BOTTOM)
 			{
 				back_media.y 			= - Main.pageHeight;
-				back_content.y 			= Main.pageHeight;
+				back_content.y 			= Main.pageHeight - Main.pageHalfHeight;
 
 				back_mblock.y 			= - Main.maskBefore - Main.pageHeight;
-				back_mask.y 			= Main.pageHeight;
+				back_mask.y 			= Main.pageHeight - Main.pageHalfHeight;
 			}
 			if (dragtype == DRAG_TOP)
 			{
 				back_media.y 			= 0;
-				back_content.y 			= 0;
+				back_content.y 			= 0 - Main.pageHalfHeight;
 				
 				back_mblock.y 			= - Main.maskBefore;
-				back_mask.y 			= 0;
+				back_mask.y 			= 0 - Main.pageHalfHeight;
 			}
 			
 			if (pageType == TYPE_RIGHT)
 			{
 				back_media.x = 0;
 				back_mblock.x = - Main.maskWidth;
-				front_media.x = Main.pageWidth;
+				front_media.x = Main.pageWidth - Main.pageWidth;
 				
 				if (pagePosition == TYPE_RIGHT)
 				{
-					back_mask.x = 2 * Main.pageWidth;
+					back_mask.x = 2 * Main.pageWidth - Main.pageWidth;
 				}
 				if (pagePosition == TYPE_LEFT)
 				{
-					back_mask.x = Main.pageWidth;
+					back_mask.x = Main.pageWidth - Main.pageWidth;
 				}
 			}
 			if (pageType == TYPE_LEFT)
 			{
 				back_media.x = - Main.pageWidth;
 				back_mblock.x = 0; 
-				front_media.x = 0;
+				front_media.x = 0 - Main.pageWidth;
 
 				if (pagePosition == TYPE_LEFT)
 				{
-					back_mask.x = 0;
+					back_mask.x = 0 - Main.pageWidth;
 				}
 				if (pagePosition == TYPE_RIGHT)
 				{
-					back_mask.x = Main.pageWidth;
+					back_mask.x = Main.pageWidth - Main.pageWidth;
 				}
 			}
 			
 			if (pagePosition == TYPE_RIGHT)
 			{
-				back_content.x = 2 * Main.pageWidth;
+				back_content.x = 2 * Main.pageWidth - Main.pageWidth;
 			}	
 			if (pagePosition == TYPE_LEFT)
 			{
-				back_content.x = 0;
+				back_content.x = 0 - Main.pageWidth;
 			}
 			
 			
@@ -722,8 +723,8 @@ package
 			// DETERMINE THE tangentToCorner FOR THE ANGLE OF THE PAGE
             tangentToCornerAngle = Math.atan2(tangentBottom.y - corner.y, tangentBottom.x - corner.x);
 			
-			back_content.x 		= Main.origin.x + corner.x;
-			back_content.y 		= Main.origin.y + corner.y;
+			back_content.x 		= /*Main.origin.x +*/ corner.x;
+			back_content.y 		= /*Main.origin.y +*/ corner.y;
 			
 			if (pageType == TYPE_RIGHT)
 				back_content.rotation = tangentToCornerAngle * 180.0 / Math.PI;
@@ -735,7 +736,7 @@ package
 				
             // VISUALIZE THE CLIPPING RECTANGLE
 			back_mask.rotation = tanAngle != 0 ? 90 * (tanAngle / Math.abs(tanAngle)) - tanAngle * 180 / Math.PI : 0;
-			back_mask.x = tangentBottom.x + Main.pageWidth;
+			back_mask.x = tangentBottom.x + Main.pageWidth - Main.pageWidth;
 			
 			
 			
@@ -855,11 +856,11 @@ package
 			dots = new MovieClip();
 			dots.mouseEnabled = false;
 			dots.mouseChildren = false;
-			dots.x = Main.origin.x;
-			dots.y = Main.origin.y;
+			dots.x = 0; // Main.origin.x;
+			dots.y = 0; // Main.origin.y;
 			addChild(dots);
 			
-			dots.visible = false;
+			//dots.visible = false;
 		}
 		
 		private function addDot(x: Number, y: Number, s:String)

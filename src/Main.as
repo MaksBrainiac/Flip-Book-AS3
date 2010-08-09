@@ -59,7 +59,7 @@
 		public var loadQuee:Array = [];
 		
 		private var layoutRoot:MovieClip;
-		private var pageArea:MovieClip;
+		private static var pageArea:MovieClip;
 		private var dragPage: XPage;
 		
 		private var dataURL:String = "pages.xml";
@@ -188,6 +188,9 @@
 			originArea.y = origin.y;
 			
 			pageArea = __createPageArea(); 
+			pageArea.y = pageHalfHeight;
+			pageArea.x = pageWidth;
+			
 			pageArea.addChild(originArea);
 			layoutRoot.addChild(pageArea);
 			// ----------------- Draw Basic Interface ----------------------------- //
@@ -239,11 +242,11 @@
 			var clip:MovieClip = new MovieClip();
 			clip.graphics.lineStyle(1, lineColor, 1, true, "normal", CapsStyle.ROUND, JointStyle.ROUND, 3);
 			clip.graphics.beginFill(fillColor, 1);
-			clip.graphics.drawRect(0, 0, pageWidth * 2, pageHeight);
+			clip.graphics.drawRect(- pageWidth, - pageHalfHeight, pageWidth * 2, pageHeight);
 			clip.graphics.endFill();
 			
-			clip.graphics.moveTo(pageWidth, 0);
-			clip.graphics.lineTo(pageWidth, pageHeight);
+			clip.graphics.moveTo(0, - pageHalfHeight);
+			clip.graphics.lineTo(0, pageHalfHeight);
 			
 			pageAreaClip.addChild(clip);
 			
@@ -284,7 +287,7 @@
 		
 		public static function getMouseOriginPosition():Point
 		{
-			var p:Point = new Point(originArea.mouseX, originArea.mouseY);
+			var p:Point = new Point(pageArea.mouseX, pageArea.mouseY);
 			return p;
 		}
 		
@@ -294,10 +297,10 @@
 			
 			for (i = 0; i < pagesCount / 2; i++)
 				if (pagesRight[i].active || pagesRight[i].hover)
-					pagesRight[i].mouse = new Point(originArea.mouseX, originArea.mouseY);
+					pagesRight[i].mouse = new Point(pageArea.mouseX, pageArea.mouseY);
 			for (i = 0; i < pagesCount / 2; i++)
 				if (pagesLeft[i].active || pagesLeft[i].hover)
-					pagesLeft[i].mouse = new Point(originArea.mouseX, originArea.mouseY);					
+					pagesLeft[i].mouse = new Point(pageArea.mouseX, pageArea.mouseY);					
 		}
 		
 		private function mouseButtonUpHandler(e:MouseEvent):void 
