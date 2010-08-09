@@ -171,28 +171,42 @@
 			// TODO: добавить функционал перехода на заданную страницу
 		}
 		
-		private function canFlipRight()
+		private function getRightPageToFlipLeft()
 		{
 			// Get top not active page
 			
 			var i;
-			//var canFlip:int = -1;
 			
-			for (i = currentPage / 2; i < pagesCount; i++)
+			for (i = currentPage / 2; i < pagesCount / 2; i++)
 			{
-				if (pagesLeft[i].animated && pagesLeft[i].pagePosition == XPage.TYPE_LEFT)
+				trace("Check ", i - 1, "animated", i - 1 >= 0 ? pagesLeft[i - 1].animated : "??");
+				
+				if (i - 1 >= 0 && pagesLeft[i - 1].animated)
 					break;
-					
-				if (!pagesRight[i].animated)
+				if (!pagesRight[i].animated || pagesRight[i].follow.x > 0)
 					return i;
 			}
 			
 			return -1;
 		}
 		
-		private function canFlipLeft()
+		private function getLeftPageToFlipRight()
 		{
+			// Get top not active page
 			
+			var i;
+			
+			for (i = currentPage / 2 - 1; i >= 0;  i--)
+			{
+				trace("Check ", i + 1, "animated", i + 1 < pagesCount / 2 ? pagesLeft[i + 1].animated : "??");
+				
+				if (i + 1 < pagesCount / 2 && pagesRight[i + 1].animated)
+					break;
+				if (!pagesLeft[i].animated || pagesLeft[i].follow.x < 0)
+					return i;
+			}
+			
+			return -1;
 		}
 		
 		private function onPageTimer(e:TimerEvent):void 
@@ -254,7 +268,7 @@
 			stage.addEventListener(MouseEvent.MOUSE_MOVE, mouseMoveHandler);
 			stage.addEventListener(MouseEvent.MOUSE_UP, mouseButtonUpHandler);
 			
-			stage.addEventListener(KeyboardEvent.KEY_UP, keyboardButtonUp);
+			stage.addEventListener(KeyboardEvent.KEY_DOWN, keyboardHandler);
 			stage.addEventListener(Event.ENTER_FRAME, debugInformation);
 			
 			pageTimer = new Timer(flipSpeed);
@@ -269,21 +283,47 @@
 			txt_pagesLeft.text = pagesLeft.toString();
 		}
 		
-		private function keyboardButtonUp(e:KeyboardEvent):void 
+		private function keyboardHandler(e:KeyboardEvent):void 
 		{
+			var p:int;
+			
 			switch (e.keyCode)
 			{
 				case Keyboard.LEFT:
-					gotoPage(currentPage + 2);
+					if (dragPage != null) return; // Block if some page dragged
+					
+					p = getRightPageToFlipLeft();
+					trace("flip " + p + " to left");
+					
+					if (p != -1)
+						pagesRight[p].flip();
+					
+					//gotoPage(currentPage + 2);
+					
 					break;
 				case Keyboard.RIGHT:
-					gotoPage(currentPage - 2);
+					if (dragPage != null) return; // Block if some page dragged
+					
+					p = getLeftPageToFlipRight();
+					trace("flip " + p + " to right");
+					
+					if (p != -1)
+						pagesLeft[p].flip();
+					
+					//gotoPage(currentPage - 2);
+					
 					break;
 				case Keyboard.HOME:
+					if (dragPage != null) return; // Block if some page dragged
+					
 					gotoPage(0);
+					
 					break;
 				case Keyboard.END:
+					if (dragPage != null) return; // Block if some page dragged
+					
 					gotoPage(pagesCount);
+					
 					break;
 			}
 		}

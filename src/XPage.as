@@ -69,12 +69,12 @@ package
 		 */
 		public var mouse:Point;
 		
-		
-		
 		/**
 		 * Follow Point
 		 */
-		private var follow:Point;
+		public var follow:Point;
+		
+		
 		
 		/**
 		 * Mouse Follow Enabled
