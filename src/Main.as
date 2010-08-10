@@ -466,6 +466,7 @@
 			//trace("page:", e.target.pageType, "position:", e.target.pagePosition, "index:", e.target.index);
 			
 			var p:XPage = XPage(e.target);
+			var k:int;
 			
 			if (p.pagePosition == XPage.TYPE_LEFT)
 			{
@@ -477,13 +478,16 @@
 				pagesLeft[p.index].regenerateContent();
 				pagesLeft[p.index].resetPosition(XPage.TYPE_LEFT);
 
-				// 1. Unlock landing page
+				currentPage = p.index * 2 + 2;
+				
+				// 1. Unlock landing page only if no other pages send to left
 				// 2. Block page before
-				pagesLeft[p.index].blocked = false;	
+				k = getLeftPageToFlipRight();
+				if (k != -1)
+					pagesLeft[p.index].blocked = false;	
+				
 				if (p.index > 0)
 					pagesLeft[p.index - 1].blocked = true;	
-				
-				currentPage = p.index * 2 + 2;
 			}
 			if (p.pagePosition == XPage.TYPE_RIGHT)
 			{
@@ -495,13 +499,16 @@
 				pagesRight[p.index].regenerateContent();
 				pagesRight[p.index].resetPosition(XPage.TYPE_RIGHT);
 
+				currentPage = p.index * 2;
+				
 				// 1. Unlock landing page
 				// 2. Block page before
-				pagesRight[p.index].blocked = false;
+				k = getRightPageToFlipLeft();
+				if (k != -1)
+					pagesRight[p.index].blocked = false;
+				
 				if (p.index + 1 < pagesCount / 2)
 					pagesRight[p.index + 1].blocked = true;	
-				
-				currentPage = p.index * 2;
 			}
 			
 			if (followPage == currentPage) pageTimer.stop();
