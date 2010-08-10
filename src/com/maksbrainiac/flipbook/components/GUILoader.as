@@ -1,4 +1,4 @@
-package  
+package com.maksbrainiac.flipbook.components
 {
 	import flash.display.MovieClip;
 	

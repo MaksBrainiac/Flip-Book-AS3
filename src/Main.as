@@ -1,11 +1,8 @@
 ﻿package 
 {
-	import com.maksbrainiac.events.ObjectEvent;
-	import fl.motion.Color;
-	import flash.display.MovieClip;
-	import flash.display.Sprite;
 	import flash.display.CapsStyle;
 	import flash.display.JointStyle;
+	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
@@ -13,11 +10,11 @@
 	import flash.geom.Point;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
-	import flash.text.TextField;
-	import flash.text.TextFieldAutoSize;
 	import flash.ui.Keyboard;
-	import flash.utils.getDefinitionByName;
 	import flash.utils.Timer;
+	
+	import com.maksbrainiac.flipbook.events.*;
+	import com.maksbrainiac.flipbook.components.*;
 	
 	/**
 	 * ...

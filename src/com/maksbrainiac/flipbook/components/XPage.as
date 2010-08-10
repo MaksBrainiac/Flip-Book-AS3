@@ -1,16 +1,16 @@
-package 
+package com.maksbrainiac.flipbook.components
 {
+	import flash.display.CapsStyle;
+	import flash.display.JointStyle;
 	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
-	import flash.utils.getTimer;
-	
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
+	import flash.utils.getTimer;
 	
-	import flash.display.CapsStyle;
-	import flash.display.JointStyle;
+	import com.maksbrainiac.flipbook.events.*;
 	
 	/**
 	 * ...

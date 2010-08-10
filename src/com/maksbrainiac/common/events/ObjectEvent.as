@@ -1,4 +1,4 @@
-package com.maksbrainiac.events 
+package com.maksbrainiac.common.events 
 {
 	import flash.events.Event;
 	

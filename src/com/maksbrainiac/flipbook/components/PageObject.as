@@ -1,16 +1,17 @@
-package  
+package com.maksbrainiac.flipbook.components
 {
 	import flash.display.Bitmap;
 	import flash.display.Loader;
 	import flash.display.MovieClip;
-	import flash.events.DataEvent;
+	import flash.events.Event;
+	import flash.events.HTTPStatusEvent;
+	import flash.events.IOErrorEvent;
 	import flash.events.MouseEvent;
 	import flash.events.ProgressEvent;
-	import flash.events.IOErrorEvent;
-	import flash.events.HTTPStatusEvent;
-	import flash.events.Event;
 	import flash.net.URLRequest;
-	import flash.utils.getQualifiedClassName;
+	
+	import com.maksbrainiac.flipbook.events.*;
+	
 	/**
 	 * ...
 	 * @author Maks Teslenko
