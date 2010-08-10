@@ -48,9 +48,7 @@ package
 			this.marginLeft = marginLeft;
 			this.marginRight = marginRight;
 			
-			preloader = new GUILoader();
-			preloader.setDimensions(pageWidth + marginLeft + marginRight, pageHeight + marginTop + marginBottom);
-			preloader.setProgress(0);
+			preloader = new GUISimpleLoader(pageWidth + marginLeft + marginRight, pageHeight + marginTop + marginBottom);
 			addChild(preloader);
 		}
 		

@@ -8,27 +8,17 @@ package
 	 */
 	public class GUILoader extends MovieClip
 	{
-		
-		public function GUILoader() 
+		public function GUILoader(width:Number = 0, height:Number = 0) 
 		{
 			super();
+			setProgress(0);
 			
-			mc_info.txt_value.text = "0%";
+			if (width > 0)
+				setDimensions(width, height);
 		}
 		
-		public function setDimensions(width:Number, height:Number)
-		{
-			mc_background.scaleX = width / 100;
-			mc_background.scaleY = height / 100;
-			
-			mc_info.x = width / 2;
-			mc_info.y = height / 2;
-		}
-		
-		public function setProgress(value:Number)
-		{
-			mc_info.txt_value.text = Math.round(value) + "%";
-		}
+		public function setDimensions(width:Number, height:Number):void {};
+		public function setProgress(value:Number):void {};
 		
 	}
 

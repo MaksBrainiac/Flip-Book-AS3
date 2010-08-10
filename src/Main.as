@@ -45,6 +45,7 @@
 		private var layoutRoot:MovieClip;
 		private var pageArea:MovieClip;
 		private var dragPage: XPage;
+		private var pageLoader: GUIPageLoader;
 		
 		private var dataURL:String = "pages.xml";
 		
@@ -68,6 +69,9 @@
 		
 		private function init():void
 		{
+			pageLoader = new GUIPageLoader(stage.stageWidth, stage.stageHeight);
+			addChild(pageLoader);
+			
 			if (loaderInfo.parameters['data'])
 				dataURL = loaderInfo.parameters['data'];
 
@@ -85,7 +89,10 @@
 				trace("Bad Config");
 				return; // DIE!!! Wrong Config!
 			}
-		
+			
+			removeChild(pageLoader);
+			
+			
 			//trace(xml.toXMLString());
 			
 			pageWidth = Number(xml.@width);
@@ -175,7 +182,7 @@
 			{
 				trace("Check ", i - 1, "animated", i - 1 >= 0 ? pagesLeft[i - 1].animated : "??");
 				
-				if (i - 1 >= 0 && pagesLeft[i - 1].animated)
+				if (i - 1 >= 0 && pagesLeft[i - 1].animated && !pagesLeft[i - 1].hover)
 					break;
 				if (!pagesRight[i].animated || pagesRight[i].follow.x > 0)
 					return i;
@@ -194,7 +201,7 @@
 			{
 				trace("Check ", i + 1, "animated", i + 1 < pagesCount / 2 ? pagesLeft[i + 1].animated : "??");
 				
-				if (i + 1 < pagesCount / 2 && pagesRight[i + 1].animated)
+				if (i + 1 < pagesCount / 2 && pagesRight[i + 1].animated && !pagesRight[i + 1].hover)
 					break;
 				if (!pagesLeft[i].animated || pagesLeft[i].follow.x < 0)
 					return i;
