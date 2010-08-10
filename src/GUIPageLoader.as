@@ -10,8 +10,6 @@ package
 		public function GUIPageLoader(width:Number = 0, height:Number = 0) 
 		{
 			super(width, height);
-			
-			trace(width, height);
 		}
 		
 		override public function setDimensions(width:Number, height:Number):void

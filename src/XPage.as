@@ -47,7 +47,7 @@ package
 			private var back_isblock:MovieClip;
 		private var back_outer_shadow:MovieClip;
 			private var back_oshadow_clip:MovieClip;
-		private var back_osmask:MovieClip; // TODO: Переделать на зеркальное отображение back_mask
+		private var back_osmask:MovieClip;
 			private var back_osblock:MovieClip;
 			
 		private var dots:MovieClip;
