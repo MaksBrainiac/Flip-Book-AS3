@@ -162,6 +162,16 @@
 			onPageTimer(null);
 		}
 		
+		private function __getTopRightPage()
+		{
+			return currentPage / 2;
+		}
+		
+		private function __getTopLeftPage()
+		{
+			return currentPage / 2 - 1;
+		}
+		
 		private function getRightPageToFlipLeft()
 		{
 			// Get top not active page
@@ -398,6 +408,7 @@
 			);
 			page.addEventListener("AnimationStarted", page_onStartAnimation);
 			page.addEventListener("AnimationComplete", page_onStopAnimation);
+			page.addEventListener("AnimationFlipped", page_onFlipAnimation);
 			return page;
 		}
 		
@@ -427,38 +438,73 @@
 			}
 		}
 		
+		private function page_onFlipAnimation(e:Event):void 
+		{
+			// 1. Block all pages from other side
+			// 2. Unlock next page from this side
+			
+			var p:XPage = XPage(e.target);
+			
+			if (p.pagePosition == XPage.TYPE_RIGHT)
+			{
+				if (p.index > 0)
+					pagesLeft[p.index - 1].blocked = true;
+					
+				if (p.index + 1 < pagesCount / 2)
+					pagesRight[p.index + 1].blocked = false;
+			}
+			
+			if (p.pagePosition == XPage.TYPE_LEFT)
+			{
+				if (p.index + 1 < pagesCount / 2)
+					pagesRight[p.index + 1].blocked = true;
+					
+				if (p.index > 0)
+					pagesLeft[p.index - 1].blocked = false;
+			}
+		}
+		
 		private function page_onStopAnimation(e:Event):void 
 		{
 			//trace("page:", e.target.pageType, "position:", e.target.pagePosition, "index:", e.target.index);
 			
+			var p:XPage = XPage(e.target);
 			
-			if (XPage(e.target).pagePosition == XPage.TYPE_LEFT) // Change visible page
+			if (p.pagePosition == XPage.TYPE_LEFT)
 			{
-				//trace(XPage(e.target).pageType);
-				
-				pagesRight[XPage(e.target).index].visible = false;
-				pagesRight[XPage(e.target).index].frontPage.visible = false;
+				pagesRight[p.index].visible = false;
+				pagesRight[p.index].frontPage.visible = false;
 
-				pagesLeft[XPage(e.target).index].visible = true;	
-				pagesLeft[XPage(e.target).index].frontPage.visible = true;	
-				pagesLeft[XPage(e.target).index].regenerateContent();
-				pagesLeft[XPage(e.target).index].resetPosition(XPage.TYPE_LEFT);
+				pagesLeft[p.index].visible = true;	
+				pagesLeft[p.index].frontPage.visible = true;	
+				pagesLeft[p.index].regenerateContent();
+				pagesLeft[p.index].resetPosition(XPage.TYPE_LEFT);
+
+				// 1. Unlock landing page
+				// 2. Block page before
+				pagesLeft[p.index].blocked = false;	
+				if (p.index > 0)
+					pagesLeft[p.index - 1].blocked = true;	
 				
-				currentPage = XPage(e.target).index * 2 + 2;
+				currentPage = p.index * 2 + 2;
 			}
-			if (XPage(e.target).pagePosition == XPage.TYPE_RIGHT) // Change visible page
+			if (p.pagePosition == XPage.TYPE_RIGHT)
 			{
-				//trace(XPage(e.target).pageType);
-				
-				pagesLeft[XPage(e.target).index].visible = false;
-				pagesLeft[XPage(e.target).index].frontPage.visible = false;
+				pagesLeft[p.index].visible = false;
+				pagesLeft[p.index].frontPage.visible = false;
 
-				pagesRight[XPage(e.target).index].visible = true;
-				pagesRight[XPage(e.target).index].frontPage.visible = true;
-				pagesRight[XPage(e.target).index].regenerateContent();
-				pagesRight[XPage(e.target).index].resetPosition(XPage.TYPE_RIGHT);
+				pagesRight[p.index].visible = true;
+				pagesRight[p.index].frontPage.visible = true;
+				pagesRight[p.index].regenerateContent();
+				pagesRight[p.index].resetPosition(XPage.TYPE_RIGHT);
+
+				// 1. Unlock landing page
+				// 2. Block page before
+				pagesRight[p.index].blocked = false;
+				if (p.index + 1 < pagesCount / 2)
+					pagesRight[p.index + 1].blocked = true;	
 				
-				currentPage = XPage(e.target).index * 2;
+				currentPage = p.index * 2;
 			}
 			
 			if (followPage == currentPage) pageTimer.stop();
@@ -467,7 +513,19 @@
 		
 		private function page_onStartAnimation(e:Event):void 
 		{
-			dragPage = XPage(e.target);
+			var p:XPage = XPage(e.target);
+			
+			if (p.active)
+				dragPage = p;
+			
+			/*var k:int;
+			
+			if (p.pagePosition == XPage.TYPE_RIGHT)
+			{
+				k = __getTopLeftPage();
+				if (k >=0 )
+					pagesLeft[k].blocked = true;
+			}*/
 		}
 		
 		public function get currentPage():int { return _currentPage; }

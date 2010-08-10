@@ -301,14 +301,14 @@ package
 		{
 			return "Page" 
 						+ index 
-						+ " (" 
+						+ (blocked ? " [" : " (")
 						+ (pagePosition == TYPE_LEFT ? "L" : "R") 
 						+ (dragtype == DRAG_TOP ? "↑" : "↓")
 						+ (active ? "D" : "_")
 						+ (animated ? "@" : "_")
 						+ (hover ? "H" : "_")
-						+ (visible ? "*" : "_") 						
-						+  ")";
+						+ (visible ? "*" : "_")
+						+ (blocked ? " ]" : " )")
 		}
 		
 		public function regenerateContent()
@@ -366,12 +366,19 @@ package
 			blocked = true;
 		}
 		
+		private function getTargetPosition(type:String, dragtype:String)
+		{
+			var yPos:Number = dragtype == DRAG_TOP ? pagePositionUp : pagePositionDown;
+			var xPos:Number = type == TYPE_LEFT ? -pageWidth : pageWidth;
+			
+			return new Point(xPos, yPos);
+		}
+		
 		private function onPageCorner_MouseOut(e:MouseEvent):void 
 		{
 			clicktime = 0;
 			if (hover)
 			{
-				hover = false;
 				deactivateDrag();
 			}
 		}
@@ -388,93 +395,69 @@ package
 		
 		public function flip()
 		{
-			//if (active) return false;
-			//if (animated) return false;
-			
 			dragtype = DRAG_BOTTOM;
-		
-			var yPos:Number = pagePositionDown;
-			var xPos:Number = 0;
 
-			if (pagePosition == TYPE_LEFT)
-				xPos = -pageWidth;
-			else
-				xPos = pageWidth;
+			follow 		= getTargetPosition(pageType, dragtype);
+			mouse 		= getTargetPosition(pageType == TYPE_LEFT ? TYPE_RIGHT : TYPE_LEFT, dragtype);
 			
-			follow = new Point(xPos, yPos);	
-			mouse = new Point(-xPos, yPos);	
-
-			active = false;
-			animated = true;
+			active 		= false;
+			animated	= true;
+			hover 		= false;
 			
 			resetPosition();
 			
-			//return true;
+			dispatchEvent(new Event("AnimationFlipped"));
 		}
 		
 		public function activateHover(dragtype:String = DRAG_BOTTOM)
 		{
 			this.dragtype = dragtype;
 			
-			mouse = new Point(mouseX, mouseY);
+			mouse 		= new Point(mouseX, mouseY);
+			follow 		= getTargetPosition(pageType, dragtype);
 			
-			var yPos:Number = 0;
-			var xPos:Number = 0;
-			
-			if (dragtype == DRAG_BOTTOM)
-				yPos = pagePositionDown;
-			if (dragtype == DRAG_TOP)
-				yPos = pagePositionUp;
-			if (pageType == TYPE_RIGHT)
-                xPos = pageWidth;
-            if (pageType == TYPE_LEFT)
-				xPos = -pageWidth;
-				
-			follow = new Point(xPos, yPos);	
-			
-			animated = true;
-			hover = true;
+			active 		= false;
+			animated 	= true;
+			hover 		= true;
 			
 			resetPosition();
+			
+			dispatchEvent(new Event("AnimationStarted"));
 		}
 		
 		public function activateDrag(dragtype:String)
 		{
 			this.dragtype = dragtype;
 			
-			mouse  = new Point(mouseX, mouseY);
-			follow = new Point(mouseX, mouseY);
+			mouse  		= new Point(mouseX, mouseY);
+			follow 		= new Point(mouseX, mouseY);
 			
-			animated = true;
-			active = true;
-			hover = false;
-			
-			dispatchEvent(new Event("AnimationStarted"));
+			animated 	= true;
+			active 		= true;
+			hover 		= false;
 			
 			resetPosition();
+			
+			dispatchEvent(new Event("AnimationStarted"));
 		}
 		
 		public function deactivateDrag()
 		{
-			var yPos:Number = 0;
-			var xPos:Number = 0;
-			
-			if (dragtype == DRAG_BOTTOM)
-				yPos = pagePositionDown;
-			if (dragtype == DRAG_TOP)
-				yPos = pagePositionUp;
-			
 			var stoptime:int = getTimer();
+			var flipped:Boolean = false;
 			if (clicktime > 0 && stoptime - clicktime < clickSpeed)
+			{
 				mouse.x = -mouse.x;
+				flipped = true;
+			}
+			
+			active 		= false;
+			hover 		= false;	
 				
-			if (mouse.x < 0)
-                xPos = -pageWidth;
-            else
-				xPos = pageWidth;
-				
-			mouse = new Point(xPos, yPos);	
-			active = false;
+			mouse 		= getTargetPosition(mouse.x < 0 ? TYPE_LEFT : TYPE_RIGHT, dragtype);
+			
+			if (flipped)
+				dispatchEvent(new Event("AnimationFlipped"));
 		}
 		
 		private function oPageCorner_MouseDown(e:MouseEvent):void 
@@ -936,8 +919,8 @@ package
 		{
 			_blocked = value;
 			
-			//hotCornerTop.mouseEnabled = !value;
-			//hotCornerBottom.mouseEnabled = !value;
+			hotCornerTop.mouseEnabled = !value;
+			hotCornerBottom.mouseEnabled = !value;
 		}
 		
 	}
