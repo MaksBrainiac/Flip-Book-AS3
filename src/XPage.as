@@ -34,8 +34,6 @@ package
 		public var pageType: String;
 		public var pagePosition: String;
 		
-
-		
 		private var back_side:MovieClip;
 			private var back_content:MovieClip;
 				private var back_media:PageObject;
@@ -47,7 +45,7 @@ package
 			private var back_isblock:MovieClip;
 		private var back_outer_shadow:MovieClip;
 			private var back_oshadow_clip:MovieClip;
-		private var back_osmask:MovieClip; // TODO: Переделать на зеркальное отображение back_mask
+		private var back_osmask:MovieClip;
 			private var back_osblock:MovieClip;
 			
 		private var dots:MovieClip;
@@ -73,6 +71,9 @@ package
 		 * Follow Point
 		 */
 		public var follow:Point;
+		
+		
+		private var _blocked:Boolean = true;
 		
 		
 		
@@ -174,10 +175,6 @@ package
 			maskHeight 		= 2 * pageHeight + 2 * pageWidth;
 			maskWidth		= pageDiagonal * 2;
 			maskBefore		= (maskHeight - pageHeight) / 2;
-			
-			
-			
-			
 			
 			back_content  = new MovieClip();
 			back_content.addChild(back_media); // Центр расположен в углу за который выполнятется перетягивание
@@ -365,6 +362,8 @@ package
 			
 			hotCornerTop.addEventListener(MouseEvent.MOUSE_DOWN, oPageCorner_MouseDown);
 			hotCornerBottom.addEventListener(MouseEvent.MOUSE_DOWN, oPageCorner_MouseDown);
+			
+			blocked = true;
 		}
 		
 		private function onPageCorner_MouseOut(e:MouseEvent):void 
@@ -929,6 +928,16 @@ package
 			}
 			
 			dots.addChild(clip);
+		}
+		
+		public function get blocked():Boolean { return _blocked; }
+		
+		public function set blocked(value:Boolean):void 
+		{
+			_blocked = value;
+			
+			//hotCornerTop.mouseEnabled = !value;
+			//hotCornerBottom.mouseEnabled = !value;
 		}
 		
 	}

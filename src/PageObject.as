@@ -4,6 +4,7 @@ package
 	import flash.display.Loader;
 	import flash.display.MovieClip;
 	import flash.events.DataEvent;
+	import flash.events.MouseEvent;
 	import flash.events.ProgressEvent;
 	import flash.events.IOErrorEvent;
 	import flash.events.HTTPStatusEvent;
@@ -82,6 +83,7 @@ package
 				if (loader.content is Bitmap)
 				{
 					Bitmap(loader.content).smoothing = true;
+					loader.addEventListener(MouseEvent.CLICK, mouseClickHandler);
 				}
 				
 				/*if (getQualifiedClassName(loader.content) == 'flash.display::Bitmap')
@@ -94,6 +96,11 @@ package
 			
 			removeChild(preloader);
 			preloader = null;
+		}
+		
+		private function mouseClickHandler(e:MouseEvent):void 
+		{
+			dispatchEvent(new Event("BitmapPageClick"));
 		}
 		
 		public function loadContent()

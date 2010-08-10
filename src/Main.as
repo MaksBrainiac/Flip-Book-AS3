@@ -45,7 +45,7 @@
 		private var layoutRoot:MovieClip;
 		private var pageArea:MovieClip;
 		private var dragPage: XPage;
-		private var pageLoader: GUIPageLoader;
+		private var flashLoader: GUIPageLoader;
 		
 		private var dataURL:String = "pages.xml";
 		
@@ -57,7 +57,7 @@
 		
 		private var pageTimer:Timer;
 		
-		private var flipSpeed:Number = 200;
+		private var flipSpeed:Number = 100;
 		
 		/**
 		 * Main Constructor
@@ -69,8 +69,8 @@
 		
 		private function init():void
 		{
-			pageLoader = new GUIPageLoader(stage.stageWidth, stage.stageHeight);
-			addChild(pageLoader);
+			flashLoader = new GUIPageLoader(stage.stageWidth, stage.stageHeight);
+			addChild(flashLoader);
 			
 			if (loaderInfo.parameters['data'])
 				dataURL = loaderInfo.parameters['data'];
@@ -90,8 +90,7 @@
 				return; // DIE!!! Wrong Config!
 			}
 			
-			removeChild(pageLoader);
-			
+			removeChild(flashLoader);
 			
 			//trace(xml.toXMLString());
 			
@@ -115,32 +114,38 @@
 				pageObject.href = String(pageXML.@href);
 				
 				pageObject.resize = int(pageXML.@resize);
+				pageObject.addEventListener("BitmapPageClick", onPageClicked);
 				
 				pages.push(pageObject);
-				addPageToLoad(pageObject);
+				pageLoader_addPage(pageObject);
 			}
 			
 			pagesCount = pages.length;
 			initializeBook();
 		}
 		
-		private function addPageToLoad(page:PageObject)
+		private function onPageClicked(e:Event):void 
 		{
-			loadQuee.push(page);
-			if (loadQuee.length == 1) loadNextPage();
+			trace("clicked page", PageObject(e.target).index);
 		}
 		
-		private function loadNextPage()
+		private function pageLoader_addPage(page:PageObject)
+		{
+			loadQuee.push(page);
+			if (loadQuee.length == 1) pageLoader_loadNext();
+		}
+		
+		private function pageLoader_loadNext()
 		{
 			var page:PageObject = loadQuee[0];
-			page.addEventListener("PageLoadComplete", onPageLoaded);
+			page.addEventListener("PageLoadComplete", pageLoader_onPageLoaded);
 			page.loadContent();
 		}
 		
-		private function onPageLoaded(e:Event):void 
+		private function pageLoader_onPageLoaded(e:Event):void 
 		{
 			loadQuee.shift();
-			if (loadQuee.length > 0) loadNextPage();
+			if (loadQuee.length > 0) pageLoader_loadNext();
 		}
 		
 		private function gotoPage(page:int)
@@ -150,26 +155,11 @@
 			if (page < 0) return;
 			if (page > pagesCount) return; // pagesCount!
 			
-			trace('goto Page', currentPage, page);
+			//trace('Goto Page: ', page, ' From Page: ', currentPage);
 			
-			var flipTimes:int = 0;
-			
-			if (page > currentPage) // Flip to left
-			{
-				//flipTimes = page - currentPage
-				
-				pagesRight[currentPage / 2 + 0].flip();
-			}
-			
-			if (page < currentPage) // Flip to right
-			{
-				pagesLeft[currentPage / 2 - 1].flip();
-			}
-			
+			followPage = page;
 			pageTimer.start();
-			
-			currentPage = page;
-			// TODO: добавить функционал перехода на заданную страницу
+			onPageTimer(null);
 		}
 		
 		private function getRightPageToFlipLeft()
@@ -180,11 +170,11 @@
 			
 			for (i = currentPage / 2; i < pagesCount / 2; i++)
 			{
-				trace("Check ", i - 1, "animated", i - 1 >= 0 ? pagesLeft[i - 1].animated : "??");
+				//trace("Check ", i - 1, "animated", i - 1 >= 0 ? pagesLeft[i - 1].animated : "??");
 				
 				if (i - 1 >= 0 && pagesLeft[i - 1].animated && !pagesLeft[i - 1].hover)
 					break;
-				if (!pagesRight[i].animated || pagesRight[i].follow.x > 0)
+				if (!pagesRight[i].animated || pagesRight[i].mouse.x > 0)
 					return i;
 			}
 			
@@ -199,11 +189,11 @@
 			
 			for (i = currentPage / 2 - 1; i >= 0;  i--)
 			{
-				trace("Check ", i + 1, "animated", i + 1 < pagesCount / 2 ? pagesLeft[i + 1].animated : "??");
+				//trace("Check ", i + 1, "animated", i + 1 < pagesCount / 2 ? pagesLeft[i + 1].animated : "??");
 				
 				if (i + 1 < pagesCount / 2 && pagesRight[i + 1].animated && !pagesRight[i + 1].hover)
 					break;
-				if (!pagesLeft[i].animated || pagesLeft[i].follow.x < 0)
+				if (!pagesLeft[i].animated || pagesLeft[i].mouse.x < 0)
 					return i;
 			}
 			
@@ -212,7 +202,33 @@
 		
 		private function onPageTimer(e:TimerEvent):void 
 		{
-			//trace("timer trigger");
+			if (followPage == currentPage)
+			{
+				pageTimer.stop();
+				return;
+			}
+			
+			var p:int;
+			
+			//trace("follow Page", followPage, "current Page", currentPage);
+			
+			if (followPage > currentPage)
+			{
+				p = getRightPageToFlipLeft();
+				if (p != -1 && p < followPage / 2)
+				{
+					pagesRight[p].flip();
+				}
+			}
+			
+			if (followPage < currentPage)
+			{
+				p = getLeftPageToFlipRight();
+				if (p != -1 && p >= followPage / 2)
+				{
+					pagesLeft[p].flip();
+				}
+			}
 		}
 
 		
@@ -266,6 +282,23 @@
 			}
 			// ----------------- Create Pages ------------------------------------- //
 			
+			if (pagesCount > 0)
+				pagesRight[0].blocked = false; // unlock top page only
+			
+			for (i = 0; i <= pagesCount / 2; i++)
+			{
+				var k:int;
+				
+				var element:MovieClip = MovieClip(getChildByName('bz' + i));
+				element.buttonMode = true;
+				element.number = i * 2;
+				element.addEventListener(MouseEvent.CLICK, function(e:MouseEvent) {
+							gotoPage(e.target.number);
+						}
+					);
+			}
+				
+			
 			stage.addEventListener(MouseEvent.MOUSE_MOVE, mouseMoveHandler);
 			stage.addEventListener(MouseEvent.MOUSE_UP, mouseButtonUpHandler);
 			
@@ -291,27 +324,25 @@
 			switch (e.keyCode)
 			{
 				case Keyboard.LEFT:
+				case Keyboard.PAGE_UP:
 					if (dragPage != null) return; // Block if some page dragged
+					
+					pageTimer.stop();
 					
 					p = getRightPageToFlipLeft();
-					trace("flip " + p + " to left");
-					
 					if (p != -1)
 						pagesRight[p].flip();
-					
-					//gotoPage(currentPage + 2);
-					
+						
 					break;
 				case Keyboard.RIGHT:
+				case Keyboard.PAGE_DOWN:
 					if (dragPage != null) return; // Block if some page dragged
 					
-					p = getLeftPageToFlipRight();
-					trace("flip " + p + " to right");
+					pageTimer.stop();
 					
+					p = getLeftPageToFlipRight();
 					if (p != -1)
 						pagesLeft[p].flip();
-					
-					//gotoPage(currentPage - 2);
 					
 					break;
 				case Keyboard.HOME:
@@ -324,7 +355,6 @@
 					if (dragPage != null) return; // Block if some page dragged
 					
 					gotoPage(pagesCount);
-					
 					break;
 			}
 		}
@@ -430,6 +460,8 @@
 				
 				currentPage = XPage(e.target).index * 2;
 			}
+			
+			if (followPage == currentPage) pageTimer.stop();
 			dispatchEvent(new ObjectEvent("PageChanged", false, false, { "page": currentPage } ));
 		}
 		
