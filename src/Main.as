@@ -160,7 +160,6 @@
 			followPage = page;
 			pageTimer.start();
 			onPageTimer(null);
-<<<<<<< HEAD
 		}
 		
 		private function __getTopRightPage()
@@ -171,8 +170,6 @@
 		private function __getTopLeftPage()
 		{
 			return currentPage / 2 - 1;
-=======
->>>>>>> 23611fbe212d468e181fc29b6cc12df5d7ca8b5c
 		}
 		
 		private function getRightPageToFlipLeft()
@@ -295,12 +292,9 @@
 			}
 			// ----------------- Create Pages ------------------------------------- //
 			
-<<<<<<< HEAD
 			if (pagesCount > 0)
 				pagesRight[0].blocked = false; // unlock top page only
 			
-=======
->>>>>>> 23611fbe212d468e181fc29b6cc12df5d7ca8b5c
 			for (i = 0; i <= pagesCount / 2; i++)
 			{
 				var k:int;
