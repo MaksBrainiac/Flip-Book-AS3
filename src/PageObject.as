@@ -92,7 +92,7 @@ package
 				}*/
 			}
 			loaded = true;
-			dispatchEvent(new Event("PageLoadComplete"));
+			dispatchEvent(new PageEvent(PageEvent.PAGE_LOADED, false, false, index));
 			
 			removeChild(preloader);
 			preloader = null;
@@ -100,7 +100,7 @@ package
 		
 		private function mouseClickHandler(e:MouseEvent):void 
 		{
-			dispatchEvent(new Event("BitmapPageClick"));
+			dispatchEvent(new PageEvent(PageEvent.PAGE_CLICKED, false, false, index));
 		}
 		
 		public function loadContent()

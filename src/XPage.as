@@ -48,7 +48,7 @@ package
 		private var back_osmask:MovieClip;
 			private var back_osblock:MovieClip;
 			
-		private var dots:MovieClip;
+		private var mc_debug:MovieClip;
 			
 		public var frontPage:MovieClip;
 		
@@ -406,7 +406,7 @@ package
 			
 			resetPosition();
 			
-			dispatchEvent(new Event("AnimationFlipped"));
+			dispatchEvent(new PageEvent(PageEvent.FLIPPED, false, false, index));
 		}
 		
 		public function activateHover(dragtype:String = DRAG_BOTTOM)
@@ -422,7 +422,7 @@ package
 			
 			resetPosition();
 			
-			dispatchEvent(new Event("AnimationStarted"));
+			dispatchEvent(new PageEvent(PageEvent.ANIMATION_START, false, false, index));
 		}
 		
 		public function activateDrag(dragtype:String)
@@ -438,7 +438,7 @@ package
 			
 			resetPosition();
 			
-			dispatchEvent(new Event("AnimationStarted"));
+			dispatchEvent(new PageEvent(PageEvent.ANIMATION_START, false, false, index));
 		}
 		
 		public function deactivateDrag()
@@ -454,10 +454,12 @@ package
 			active 		= false;
 			hover 		= false;	
 				
-			mouse 		= getTargetPosition(mouse.x < 0 ? TYPE_LEFT : TYPE_RIGHT, dragtype);
+			var toPosition:String = mouse.x < 0 ? TYPE_LEFT : TYPE_RIGHT;
 			
-			if (flipped)
-				dispatchEvent(new Event("AnimationFlipped"));
+			mouse 		= getTargetPosition(toPosition, dragtype);
+			
+			if (flipped || toPosition != pagePosition)
+				dispatchEvent(new PageEvent(PageEvent.FLIPPED, false, false, index));
 		}
 		
 		private function oPageCorner_MouseDown(e:MouseEvent):void 
@@ -491,7 +493,7 @@ package
 					else
 					{
 						pagePosition = TYPE_LEFT;
-						dispatchEvent(new Event("AnimationComplete"));
+						dispatchEvent(new PageEvent(PageEvent.ANIMATION_END, false, false, index));
 					}
 					animated = false;
 				}
@@ -504,7 +506,7 @@ package
 					else
 					{
 						pagePosition = TYPE_RIGHT;
-						dispatchEvent(new Event("AnimationComplete"));
+						dispatchEvent(new PageEvent(PageEvent.ANIMATION_END, false, false, index));
 					}
 					animated = false;	
 				}
@@ -546,13 +548,9 @@ package
 				front_media.x = 0;
 				
 				if (pagePosition == TYPE_RIGHT)
-				{
 					back_mask.x = pageWidth;
-				}
 				if (pagePosition == TYPE_LEFT)
-				{
 					back_mask.x = 0;
-				}
 			}
 			if (pageType == TYPE_LEFT)
 			{
@@ -561,25 +559,15 @@ package
 				front_media.x = -pageWidth;
 
 				if (pagePosition == TYPE_LEFT)
-				{
 					back_mask.x = -pageWidth;
-				}
 				if (pagePosition == TYPE_RIGHT)
-				{
 					back_mask.x = 0;
-				}
 			}
 			
 			if (pagePosition == TYPE_RIGHT)
-			{
 				back_content.x = pageWidth;
-			}	
 			if (pagePosition == TYPE_LEFT)
-			{
 				back_content.x = -pageWidth;
-			}
-			
-			
 
 			if (pageType == TYPE_RIGHT)
 			{
@@ -793,53 +781,53 @@ package
 			
 			// DEBUG AREA
 			{
-				clearDots();
+				debug_clear();
 				
-				drawLine(0, 0, follow.x, follow.y, grey);
-				drawLine(follow.x, follow.y, 0, pagePositionDown, grey);
+				debug_drawLine(0, 0, follow.x, follow.y, grey);
+				debug_drawLine(follow.x, follow.y, 0, pagePositionDown, grey);
 				
-				drawLine(0, pagePositionUp, corner.x, corner.y, red);
-				drawLine(0, 0, corner.x, corner.y, red);
-				drawLine(corner.x, corner.y, 0, pagePositionDown, red);
-				drawLine(0, pagePositionDown, corner.x, corner.y, red);
+				debug_drawLine(0, pagePositionUp, corner.x, corner.y, red);
+				debug_drawLine(0, 0, corner.x, corner.y, red);
+				debug_drawLine(corner.x, corner.y, 0, pagePositionDown, red);
+				debug_drawLine(0, pagePositionDown, corner.x, corner.y, red);
 				
-				addDot(follow.x, follow.y,"F");
+				debug_addPoint(follow.x, follow.y,"F");
 				
-				addDot(0, 0, "SC");
-				addDot(0, pagePositionUp, "ST");
-				addDot(0, pagePositionDown, "SB");
+				debug_addPoint(0, 0, "SC");
+				debug_addPoint(0, pagePositionUp, "ST");
+				debug_addPoint(0, pagePositionDown, "SB");
 				
-				addDot(radius1.x, radius1.y, "R1");
-				addDot(radius2.x, radius2.y, "R2"); 
+				debug_addPoint(radius1.x, radius1.y, "R1");
+				debug_addPoint(radius2.x, radius2.y, "R2"); 
 
 				//addDot(mouse.x, mouse.y, "M");
-				addDot(corner.x, corner.y, "C");
+				debug_addPoint(corner.x, corner.y, "C");
 				
 				if (dragtype == DRAG_BOTTOM)
 				{
-					drawLine(bisector.x, bisector.y, bisector.x, pagePositionDown, blue);
-					drawLine(bisector.x, bisector.y, tangentBottom.x, tangentBottom.y, blue);
-					drawLine(bisector.x, pagePositionDown, tangentBottom.x, tangentBottom.y, blue);
+					debug_drawLine(bisector.x, bisector.y, bisector.x, pagePositionDown, blue);
+					debug_drawLine(bisector.x, bisector.y, tangentBottom.x, tangentBottom.y, blue);
+					debug_drawLine(bisector.x, pagePositionDown, tangentBottom.x, tangentBottom.y, blue);
 					
-					addDot(bisector.x, bisector.y, "T0");
-					addDot(bisector.x, pagePositionDown, "T1");
-					addDot(tangentBottom.x, tangentBottom.y, "T2");
+					debug_addPoint(bisector.x, bisector.y, "T0");
+					debug_addPoint(bisector.x, pagePositionDown, "T1");
+					debug_addPoint(tangentBottom.x, tangentBottom.y, "T2");
 					
-					drawDemoCircle(0, pagePositionDown, pageWidth, "");
-					drawDemoCircle(0, pagePositionUp, pageDiagonal, "");
+					debug_drawCircle(0, pagePositionDown, pageWidth, "");
+					debug_drawCircle(0, pagePositionUp, pageDiagonal, "");
 				}
 				if (dragtype == DRAG_TOP)
 				{
-					drawLine(bisector.x, bisector.y, bisector.x, pagePositionUp, blue);
-					drawLine(bisector.x, bisector.y, tangentBottom.x, tangentBottom.y, blue);
-					drawLine(bisector.x, pagePositionUp, tangentBottom.x, tangentBottom.y, blue);
+					debug_drawLine(bisector.x, bisector.y, bisector.x, pagePositionUp, blue);
+					debug_drawLine(bisector.x, bisector.y, tangentBottom.x, tangentBottom.y, blue);
+					debug_drawLine(bisector.x, pagePositionUp, tangentBottom.x, tangentBottom.y, blue);
 					
-					addDot(bisector.x, bisector.y, "T0");
-					addDot(bisector.x, pagePositionUp, "T1");
-					addDot(tangentBottom.x, tangentBottom.y, "T2");
+					debug_addPoint(bisector.x, bisector.y, "T0");
+					debug_addPoint(bisector.x, pagePositionUp, "T1");
+					debug_addPoint(tangentBottom.x, tangentBottom.y, "T2");
 					
-					drawDemoCircle(0, pagePositionUp, pageWidth, "");
-					drawDemoCircle(0, pagePositionDown, pageDiagonal, "");
+					debug_drawCircle(0, pagePositionUp, pageWidth, "");
+					debug_drawCircle(0, pagePositionDown, pageDiagonal, "");
 				}
 				
 				/*var r0: Point = dots.globalToLocal(maskAngle.localToGlobal(new Point(- maskSize.x, -85)));
@@ -855,37 +843,37 @@ package
 			}
 		}
 		
-		private function clearDots()
+		private function debug_clear()
 		{
-			if (dots)
-				removeChild(dots);
+			if (mc_debug)
+				removeChild(mc_debug);
 			
-			dots = new MovieClip();
-			dots.mouseEnabled = false;
-			dots.mouseChildren = false;
-			dots.x = 0;
-			dots.y = 0;
-			addChild(dots);
+			mc_debug = new MovieClip();
+			mc_debug.mouseEnabled = false;
+			mc_debug.mouseChildren = false;
+			mc_debug.x = 0;
+			mc_debug.y = 0;
+			addChild(mc_debug);
 			
-			dots.visible = false;
+			mc_debug.visible = false;
 		}
 		
-		private function addDot(x: Number, y: Number, s:String)
+		private function debug_addPoint(x: Number, y: Number, s:String)
         {
-			drawDemoCircle(x, y, 10, s);
+			debug_drawCircle(x, y, 10, s);
 		}
 
-        private function drawLine(x1:Number, y1:Number, x2:Number, y2:Number, c:uint)
+        private function debug_drawLine(x1:Number, y1:Number, x2:Number, y2:Number, c:uint)
         {
 			var clip:MovieClip = new MovieClip();
 			clip.graphics.lineStyle(1, c, 0.6, true, "normal", CapsStyle.ROUND, JointStyle.ROUND, 3);
 			clip.graphics.moveTo(x1, y1);
 			clip.graphics.lineTo(x2, y2);
 			
-			dots.addChild(clip);
+			mc_debug.addChild(clip);
         }
 
-		private function drawDemoCircle(x: Number, y:Number, radius:Number, text:String)
+		private function debug_drawCircle(x: Number, y:Number, radius:Number, text:String)
 		{
 			var clip:MovieClip = new MovieClip();
 			clip.graphics.lineStyle(1, 0, 0.6, true, "normal", CapsStyle.ROUND, JointStyle.ROUND, 3);
@@ -910,7 +898,7 @@ package
 				clip.addChild(tf);
 			}
 			
-			dots.addChild(clip);
+			mc_debug.addChild(clip);
 		}
 		
 		public function get blocked():Boolean { return _blocked; }

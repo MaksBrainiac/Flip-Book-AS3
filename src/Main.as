@@ -114,7 +114,7 @@
 				pageObject.href = String(pageXML.@href);
 				
 				pageObject.resize = int(pageXML.@resize);
-				pageObject.addEventListener("BitmapPageClick", onPageClicked);
+				pageObject.addEventListener(PageEvent.PAGE_CLICKED, onPageClicked);
 				
 				pages.push(pageObject);
 				pageLoader_addPage(pageObject);
@@ -138,7 +138,7 @@
 		private function pageLoader_loadNext()
 		{
 			var page:PageObject = loadQuee[0];
-			page.addEventListener("PageLoadComplete", pageLoader_onPageLoaded);
+			page.addEventListener(PageEvent.PAGE_LOADED, pageLoader_onPageLoaded);
 			page.loadContent();
 		}
 		
@@ -318,7 +318,7 @@
 			pageTimer = new Timer(flipSpeed);
 			pageTimer.addEventListener(TimerEvent.TIMER, onPageTimer);
 			
-			addEventListener("PageChanged", onPageChanged);
+			addEventListener(PageEvent.PAGE_CHANGED, onPageChanged);
 		}
 		
 		private function debugInformation(e:Event):void 
@@ -369,10 +369,10 @@
 			}
 		}
 		
-		private function onPageChanged(e:ObjectEvent):void 
+		private function onPageChanged(e:PageEvent):void 
 		{
-			txt_pageNumber_right.text = e.object.page + 1;
-			txt_pageNumber_left.text = e.object.page + 0;
+			txt_pageNumber_right.text = int(e.index + 1).toString();
+			txt_pageNumber_left.text = int(e.index + 0).toString();
 
 			if (currentPage <=0)
 				txt_pageNumber_left.text = "";
@@ -406,9 +406,9 @@
 			var page:MovieClip = new XPage(index, type, getPage(2 * index), getPage(2 * index + 1), 
 				{ cornerSize: cornerSize, shadowWidth:shadowWidth, pageHeight: pageHeight, clickSpeed: clickSpeed, animationSpeed: animationSpeed } 
 			);
-			page.addEventListener("AnimationStarted", page_onStartAnimation);
-			page.addEventListener("AnimationComplete", page_onStopAnimation);
-			page.addEventListener("AnimationFlipped", page_onFlipAnimation);
+			page.addEventListener(PageEvent.ANIMATION_START, page_onStartAnimation);
+			page.addEventListener(PageEvent.ANIMATION_END, page_onStopAnimation);
+			page.addEventListener(PageEvent.FLIPPED, page_onFlipAnimation);
 			return page;
 		}
 		
@@ -438,7 +438,7 @@
 			}
 		}
 		
-		private function page_onFlipAnimation(e:Event):void 
+		private function page_onFlipAnimation(e:PageEvent):void 
 		{
 			// 1. Block all pages from other side
 			// 2. Unlock next page from this side
@@ -464,7 +464,7 @@
 			}
 		}
 		
-		private function page_onStopAnimation(e:Event):void 
+		private function page_onStopAnimation(e:PageEvent):void 
 		{
 			//trace("page:", e.target.pageType, "position:", e.target.pagePosition, "index:", e.target.index);
 			
@@ -508,10 +508,10 @@
 			}
 			
 			if (followPage == currentPage) pageTimer.stop();
-			dispatchEvent(new ObjectEvent("PageChanged", false, false, { "page": currentPage } ));
+			dispatchEvent(new PageEvent(PageEvent.PAGE_CHANGED, false, false, currentPage));
 		}
 		
-		private function page_onStartAnimation(e:Event):void 
+		private function page_onStartAnimation(e:PageEvent):void 
 		{
 			var p:XPage = XPage(e.target);
 			
