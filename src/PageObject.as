@@ -34,16 +34,29 @@ package
 		public var resize:int;
 		public var loaded:Boolean = false;
 		
+		public var preloader:GUILoader;
 		public var loader:Loader;
 		public var urlRequest:URLRequest;
 		
-		public function PageObject() 
+		public function PageObject(width:Number, height:Number, marginTop:Number = 0, marginBottom:Number = 0, marginLeft:Number = 0, marginRight:Number = 0) 
 		{
+			pageWidth = width;
+			pageHeight = height;
+			
+			this.marginTop = marginTop;
+			this.marginBottom = marginBottom;
+			this.marginLeft = marginLeft;
+			this.marginRight = marginRight;
+			
+			preloader = new GUILoader();
+			preloader.setDimensions(pageWidth + marginLeft + marginRight, pageHeight + marginTop + marginBottom);
+			preloader.setProgress(0);
+			addChild(preloader);
 		}
 		
 		private function progressHandler(e:ProgressEvent):void 
 		{
-			
+			preloader.setProgress(e.bytesLoaded / e.bytesTotal * 100);
 		}
 		
 		private function ioErrorHandler(e:IOErrorEvent):void 
@@ -80,6 +93,9 @@ package
 			}
 			loaded = true;
 			dispatchEvent(new Event("PageLoadComplete"));
+			
+			removeChild(preloader);
+			preloader = null;
 		}
 		
 		public function loadContent()
@@ -95,6 +111,8 @@ package
             loader.load(urlRequest);
 			
 			addChild(loader);
+
+			setChildIndex(preloader, numChildren - 1);
 		}
 		
 	}

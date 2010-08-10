@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <data width="250" height="300">
-	<page number="0" src="pages/pic2.png" large="" href="" marginTop="50" marginBottom="100" marginLeft="0" marginRight="20" resize="1" />
-	<page number="1" src="pages/pic2.png" large="" href="" marginTop="50" marginBottom="100" marginLeft="20" marginRight="0" resize="1" />
+	<page number="0" src="pages/page1.png" large="" href="" marginTop="0" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
+	<page number="1" src="pages/page2.png" large="" href="" marginTop="0" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
+	<page number="2" src="pages/page3.png" large="" href="" marginTop="0" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
+	<page number="3" src="pages/page4.png" large="" href="" marginTop="0" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
+	<page number="4" src="pages/page5.png" large="" href="" marginTop="0" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
+	<page number="5" src="pages/page6.png" large="" href="" marginTop="0" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
 	
-	<page number="2" src="pages/pic2.png" large="" href="" marginTop="0" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
-	<page number="3" src="pages/pic2.png" large="" href="" marginTop="0" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
+	<_page number="2" src="pages/pic2.png" large="" href="" marginTop="0" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
+	<_page number="3" src="pages/pic2.png" large="" href="" marginTop="0" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
 	
-	<page number="4" src="pages/pic0.png" large="" href="" marginTop="0" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
-	<page number="5" src="pages/pic0.png" large="" href="" marginTop="0" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
+	<_page number="0" src="pages/pic0.png" large="" href="" marginTop="0" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
+	<_page number="1" src="pages/pic0.png" large="" href="" marginTop="0" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
 	
-	<page number="6" src="pages/pic1.png" large="" href="" marginTop="20" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
-	<page number="7" src="pages/pic1.png" large="" href="" marginTop="20" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
+	<_page number="2" src="pages/pic1.png" large="" href="" marginTop="20" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
+	<_page number="3" src="pages/pic1.png" large="" href="" marginTop="20" marginBottom="0" marginLeft="0" marginRight="0" resize="1" />
 	
 </data>
